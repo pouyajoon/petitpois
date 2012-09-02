@@ -1,0 +1,25 @@
+{
+  "name" : "petitpoids"
+  , "author": "pouya <pouyajoon@gmail.com>"
+  , "version" : "0.0.1"
+  , "dependencies" : {
+    "express" : ">=2.4.6",
+    "jade" : ">= 0.16.2",
+    "socket.io" : ">= 0.8.7",
+    "underscore" : ">= 1.2.0",
+    "mongoose" : ">= 1.0.0",
+    "mongoose-types" : ">= 1.0.0",
+    "connect" : ">= 1.0.0",
+    "common" : ">= 0.0.1",
+    "socket.io-client" : ">= 0.8.7",
+    "should" : ">= 0.0.1",
+    "connect-redis" : ">= 0.0.1"
+  }
+  , "scripts": {
+    "test": "make test"
+  }  
+  , "devDependencies": {
+    "nodeunit": ">= 0.0.1"
+  }
+  , "private" : true
+}

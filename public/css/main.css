@@ -1,0 +1,59 @@
+li.dayStep{
+	height: 120px;
+	border: 1px solid green;
+	list-style: none;	
+}
+input{
+	height: 30px;
+	width: 400px;
+	text-align: center;
+	font-size: 16px;
+	border: none;
+	background-color: #eee;
+}
+
+span.ui-state-hover{
+	background-color: green;
+}
+
+#steps, ul.structure, #DayTemplates, .DayTemplate{
+	margin: 0px;
+	padding: 0px;	
+}
+
+.list-item:hover{
+	cursor: pointer;
+}
+
+#steps{
+	margin-bottom: 5px;
+}
+
+
+li.daystep-structure{
+	display: inline-block;
+	text-align: center;
+	min-width: 100px;
+	padding: 5px;
+
+}
+div.daystart{
+	height: 120px;
+}
+
+li{
+	border-radius: 5px;
+}
+
+li.DayTemplate{
+	list-style: none;
+	border: 1px solid blue;
+	padding: 5px;
+}
+
+.DayTemplate li.edit-attr{
+	border: 1px solid green;
+	list-style: none;
+	padding: 5px;
+	min-height: 120px;
+}
