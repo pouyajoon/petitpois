@@ -4,22 +4,17 @@ html
   
     script(type='text/javascript', src='/js/jquery-1.7.1.min.js');
     script(type='text/javascript', src='/js/underscore.js')
-    script(type='text/javascript', src='http://haineault.com/media/jquery/ui-timepickr/page/jquery.utils.js');
-    script(type='text/javascript', src='http://haineault.com/media/jquery/ui-timepickr/page/jquery.strings.js');
-    script(type='text/javascript', src='http://haineault.com/media/jquery/ui-timepickr/page/jquery.ui.all.js');
+    script(type='text/javascript', src='/js/jquery.utils.js');
+    script(type='text/javascript', src='/js/jquery.strings.js');
+    script(type='text/javascript', src='/js/jquery.ui.all.js');
     script(type='text/javascript', src='/socket.io/socket.io.js')
     script(type='text/javascript', src='../js/ui.timepicker.js');
-    link(rel='stylesheet', href='http://haineault.com/media/jquery/ui-timepickr/src/css/ui.timepickr.css');
-    link(rel='stylesheet', href='http://haineault.com/media/jquery/ui-timepickr/dist/themes/default/ui.core.css');
+    link(rel='stylesheet', href='/css/ui.timepickr.css');
+    link(rel='stylesheet', href='/css/themes/default/ui.core.css');
+    script(type='text/javascript', src='/js/controllerView.js');
     script(type='text/javascript', src='/js/main.js');
-
-
-                  
+    script(type='text/javascript')
+      var G_CONTROLLER = '#{controller}';                  
     link(rel='stylesheet', href='/css/main.css')
     title= title
 body
-  h1 Etudiants
-  div(id='skills')
-  ul(id='steps')
-  button(id='addDayStep') Ajouter une étape
-  #input(id='create-daytemplate',value="09:00")

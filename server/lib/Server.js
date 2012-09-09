@@ -23,7 +23,7 @@ var Server = function(options, callback){
   this.options = options;
   this.paths = this.options.paths;
 
-  this.webServer = "localhost";
+  this.webServer = "pouyaair";
 
   this.app.configure(function(callback){
     this.app.set('view engine', 'jade');
@@ -118,6 +118,10 @@ Server.prototype.setRoutes = function (){
       });
     } else {
       this.app.get(p.path, function(req, res){
+        //console.log("req pa", req.params)
+        for (var param in req.params){
+          renderOptions[param] = req.params[param];
+        };
         res.render(p.view, renderOptions);
       });
     }

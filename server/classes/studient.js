@@ -23,3 +23,17 @@ exports.create = function(_name, callback){
   return studient.setup(_name, callback);
 };
 
+
+exports.getModel = function(){
+  var models = [];
+  _.each(DayTemplateModel.schema.paths, function(attr){
+    var model = {};
+    model.name = attr.path;
+    model.type = attr.options.type.name;
+    models.push(model);
+  });
+  return models;
+};
+
+
+exports.Model = StudientModel;
