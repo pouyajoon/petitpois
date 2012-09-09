@@ -1,8 +1,7 @@
 var Studient = function(petitPoids, callback) {
     cvTools.heritate(Studient, ControllerView);
-    this.init(petitPoids, "Studient", "Etudient");
+    this.init(petitPoids, "Studient", "Etudiant");
     this.modelView.name = cvTools.createModelView('name', 'Nom', 'String');
-    this.outputDOMStructure('body');
     return this.setup(callback);
   }
 

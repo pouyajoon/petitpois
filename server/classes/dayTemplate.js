@@ -18,7 +18,7 @@ DayTemplateModel.prototype.setup = function(callback){
 };
 
 
-exports.getDayTemplates = function(callback){
+exports.getItems = function(callback){
 	DayTemplateModel.find({}, function(err, data){
 		return callback(null, data);
 	});

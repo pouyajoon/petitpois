@@ -1,7 +1,7 @@
 !!! 5
 html
   head
-  
+    link(rel="stylesheet",href="//fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&amp;subset=latin,latin-ext")
     script(type='text/javascript', src='/js/jquery-1.7.1.min.js');
     script(type='text/javascript', src='/js/underscore.js')
     script(type='text/javascript', src='/js/jquery.utils.js');
@@ -14,7 +14,10 @@ html
     script(type='text/javascript', src='/js/controllerView.js');
     script(type='text/javascript', src='/js/main.js');
     script(type='text/javascript')
-      var G_CONTROLLER = '#{controller}';                  
+      var G_CONTROLLER = '#{controller}';
     link(rel='stylesheet', href='/css/main.css')
     title= title
 body
+    div(id='top-menu-container')
+    div(id='err-zone')
+    div(id='body-container')

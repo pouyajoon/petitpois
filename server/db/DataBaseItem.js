@@ -3,16 +3,15 @@ var UserModel = moaSchema.UserModel;
 var _ = require('underscore');
 
 
-  // process.on('uncaughtException', function (err) {
-  //   console.log('uncaughtException : ', err);
-  //   return callback(err, null);
-  // });
-
-
 var DataBaseItem = function(_model){
 	this.model = _model;
 };
 
+
+DataBaseItem.prototype.setup = function(model, callback) {
+  this.model = model;
+  return this.saveToDB(callback);
+};
 
 DataBaseItem.prototype.saveToDB = function(callback){
   //console.log("saveToDB");

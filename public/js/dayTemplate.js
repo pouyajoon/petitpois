@@ -3,7 +3,6 @@ var DayTemplate = function(petitPoids, callback) {
     this.init(petitPoids, "DayTemplate", "Journée Type");
     this.modelView.name = cvTools.createModelView('name', 'Nom de la journée', 'String');
     this.modelView.startTime = cvTools.createModelView('startTime', 'Début de la journée', 'Time');
-    this.outputDOMStructure('body');
     return this.setup(callback);
   }
 

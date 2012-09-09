@@ -1,16 +1,20 @@
 $(function() {
 
 
+  if (G_CONTROLLER.length > 0) {
 
-  $("head").append('<script type="text/javascript" src="/js/' + G_CONTROLLER + '.js"></script>');
-  $("head").append('<link rel="stylesheet" href="/css/' + G_CONTROLLER + '.css"/>');
-
+    $("head").append('<script type="text/javascript" src="/js/' + G_CONTROLLER + '.js"></script>');
+    $("head").append('<link rel="stylesheet" href="/css/' + G_CONTROLLER + '.css"/>');
+  }
 
   new PetitPoids(function(pp) {
-    console.log(G_CONTROLLER);
-    new window[G_CONTROLLER](pp, function(err, viewController) {
-      viewController.getAll();
-    });
+
+    pp.getModelControllers();
+    if (G_CONTROLLER.length > 0) {
+      new window[G_CONTROLLER](pp, function(err, viewController) {
+        viewController.getAll();
+      });
+    }
   });
 });
 
@@ -49,16 +53,29 @@ var PetitPoids = function(callback) {
       //console.log('connected', data);
     });
 
-    this.socket.on('data', function(data) {
-      $.each(data.studients, function(i, s) {
-        $('body').append(s.name + "</br>");
-      });
-    }.bind(this));
-    this.socket.on('disconnect', function(data) {
-    }.bind(this));
+    // this.socket.on('data', function(data) {
+    //   $.each(data.studients, function(i, s) {
+    //     $('body').append(s.name + "</br>");
+    //   });
+    // }.bind(this));
+    this.socket.on('disconnect', function(data) {}.bind(this));
     return callback(this)
   }
 
+
+PetitPoids.prototype.getModelControllers = function() {
+  this.socket.emit('getControllers', function(controllers) {
+    //console.log(controllers);
+    var o = [];
+    o.push("<nav class='cleafix' id='top-menu'>");
+    _.each(controllers, function(c) {
+      var active = (G_CONTROLLER === c) ? "class='active'" : "";
+      o.push("<a ", active, " href='/", c, ".html'>", c, "</a>");
+    });
+    o.push("</nav>");
+    $("#top-menu-container").html(o.join(''));
+  });
+};
 
 
 function dateToString(date) {
@@ -95,7 +112,7 @@ function setTimePicker(stepID) {
     trigger: 'click',
     convention: 24,
     rangeMin: ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55', '60'],
-    updateLive : true
+    updateLive: true
     //resetOnBlur:false
   });
 }

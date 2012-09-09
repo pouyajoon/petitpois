@@ -3,10 +3,8 @@ var _ = require('underscore');
 
 var SkillModel = moaSchema.SkillModel;
 
-SkillModel.prototype.setup = function(name, callback){
+SkillModel.prototype.setup = function(callback){
   this.model = SkillModel;
-  this.name = name;
-  this.parent = null;
   return this.saveToDB(callback);
 };
 

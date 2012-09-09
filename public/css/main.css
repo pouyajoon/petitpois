@@ -1,3 +1,9 @@
+body{
+	    font: 400 12px/1.5 "Open Sans",sans-serif;
+	    margin:0px;
+}
+
+
 li.dayStep{
 	height: 120px;
 	border: 1px solid green;
@@ -47,4 +53,65 @@ li{
 
 button{
 	margin: 5px;
+}
+
+#body-container{
+	margin-left: 5px;
+}
+
+
+nav {
+    position: fixed;
+    right: 15px;
+    top: 20px;
+    z-index: 100;
+}
+nav a {
+    border-right: 1px dotted #EEEEEE;
+    margin: 0 5px;
+    padding-right: 15px;
+}
+nav a:last-child {
+    border-right: medium none;
+}
+nav a.active {
+    color: #353535;
+    font-weight: bold;
+}
+.clearfix:after {
+    clear: both;
+    content: ".";
+    display: block;
+    height: 0;
+    line-height: 0;
+    visibility: hidden;
+}
+.clearfix {
+    display: inline-block;
+}
+html[xmlns] .clearfix {
+    display: block;
+}
+* html .clearfix {
+    height: 1%;
+}
+
+a {
+    color: #259DFF;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+nav a {
+    color: #7B838A;
+}
+
+
+#err-zone{
+	background-color: red;
+	font-size: 1.2em;
+	padding: 5px;
+	color:white;
+	display: none;
 }

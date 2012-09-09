@@ -55,8 +55,11 @@ ControllerView.prototype.init = function(pp, name, displayName, modelView) {
 };
 
 ControllerView.prototype.setup = function(callback) {
+  this.outputDOMStructure('#body-container');
   $("#add" + this.name).click(function(e) {
+    //console.log('click add');
     this.pp.socket.emit('add' + this.name, {}, function(err, dbItem) {
+      //console.log(dbItem);
       this.createDOM(dbItem);
     }.bind(this));
   }.bind(this));
@@ -148,6 +151,25 @@ ControllerView.prototype.createDOM = function(data) {
   this.createDOMAddJSEditAttrUpdate();
 }
 
+
+ControllerView.prototype.createInputForAttr = function(o, attr, attrView, value) {
+  switch (attrView.type) {
+  case "Enum":
+    o.push("<select>");
+    _.each(attrView.enumValues, function(eV) {
+      o.push("<option value='", eV, "' ", (eV === value) ? "selected" : "", ">");
+      o.push(ev, "</option>");
+    });
+    o.push("</select>");
+    //$("#" +this.getAttrDOMID(attrView.id)).
+    break;
+  default:
+    o.push("<input id='", this.getAttrDOMID(attrView.id), "' value='", value, "'/>");
+    break;
+  }
+
+};
+
 ControllerView.prototype.createDOMOutputEditAttr = function() {
   var o = [];
   o.push("<li class='", this.name, "' id='", this.getClassDOMID() + "'>");
@@ -156,7 +178,6 @@ ControllerView.prototype.createDOMOutputEditAttr = function() {
   this.browseModelView(this.item, function(attr, attrView, value) {
     o.push("<li class='", this.getClassDOMID(), "-structure edit-attr'>");
     o.push(attrView.name, " : ");
-    o.push("<input id='", this.getAttrDOMID(attrView.id), "' value='", value, "'/>");
     o.push("</li>");
   }.bind(this));
   o.push("</ul>");
@@ -170,15 +191,22 @@ ControllerView.prototype.createDOMDoJSActions = function() {
     case "Time":
       setTimePicker(this.getAttrDOMID(attrView.id));
       break;
+    case "Enum":
+      //$("#" +this.getAttrDOMID(attrView.id)).
+      break;
     }
   }.bind(this));
 };
 
 
 ControllerView.prototype.createDOMAddJSEditAttrUpdate = function() {
+
+  // UPDATE AFTER FOCUS OUT
   $("#" + this.getClassDOMID() + " .edit-attr").focusout(function(e) {
     this.update();
   }.bind(this));
+
+  // DELETE ON CLICK ON DELETE BUTTON
   var deleteID = "#delete-" + this.getClassDOMID();
   $(deleteID).click(function(e) {
     var id = $(deleteID).attr('data-item-id');
@@ -224,9 +252,20 @@ ControllerView.prototype.updateItemFromDOM = function() {
   }.bind(this));
 };
 
+ControllerView.prototype.catchError = function(err) {
+  $("#err-zone").html(err.message);
+  $("#err-zone").fadeIn(500, function() {
+    $("#err-zone").fadeOut(2000);
+  });
+}
+
 ControllerView.prototype.update = function() {
+
   this.updateItemFromDOM();
   this.pp.socket.emit("update" + this.name, this.item, function(err, dt) {
+    if (err) {
+      return this.catchError(err);
+    }
     this.getAll();
   }.bind(this));
 };
