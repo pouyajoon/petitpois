@@ -1,45 +1,3 @@
-var cvTools = function() {
-
-  }
-
-cvTools.heritate = function(_child, _parent) {
-  for (var a in _parent.prototype) {
-    if (typeof _child.prototype[a] === "undefined") {
-      _child.prototype[a] = _parent.prototype[a];
-    }
-  }
-};
-
-cvTools.createModelView = function(id, name, type, readOnly, transformFunctionDBToView) {
-  return {
-    'id': id,
-    'name': name,
-    'type': type,
-    'readOnly': (_.isUndefined(readOnly) ? false : readOnly)
-  };
-}
-
-
-var cvAttrTools = {};
-
-cvAttrTools.dateToTime = function(dateString) {
-  if (_.isUndefined(dateString)) {
-    return null;
-  }
-  var d = new Date(dateString);
-  var res = d.toISOString().substring(11, 16);
-  return res;
-}
-
-
-cvAttrTools.timeToDate = function(time) {
-  var hours = time.substring(0, 2);
-  var minutes = time.substring(3);
-  var timeDate = new Date(); //Date(0000, 00, 00, hours, minutes, 00);
-  timeDate.setTime((hours * 3600 + minutes * 60) * 1000);
-  return timeDate;
-}
-
 
 var ControllerView = function() {
 
@@ -54,13 +12,18 @@ ControllerView.prototype.init = function(pp, name, displayName, modelView) {
   this.modelView = {};
 };
 
-ControllerView.prototype.setup = function(callback) {
-  this.outputDOMStructure('#body-container');
+ControllerView.prototype.setup = function(container, callback) {
+  this.outputDOMStructure(container);
   $("#add" + this.name).click(function(e) {
-    //console.log('click add');
     this.pp.socket.emit('add' + this.name, {}, function(err, dbItem) {
-      //console.log(dbItem);
-      this.createDOM(dbItem);
+      var o = [];
+      dbItem = this.applyDBToViewTransformationsForItem(dbItem);
+      this.item = dbItem.item;
+      this.outputListItem(o);
+      $("#" + this.name + "-list").append(o.join(''));
+      this.registerClickEditMode(this.item);            
+      this.createDOM(dbItem, "#" + this.getListItemID());
+
     }.bind(this));
   }.bind(this));
   this.pp.socket.emit("get" + this.name + "Model", {}, function(err, model) {
@@ -70,22 +33,21 @@ ControllerView.prototype.setup = function(callback) {
 }
 
 
+ControllerView.prototype.getClassDOMID = function() {
+  return this.name + "-" + this.item._id;
+}
+
+
 ControllerView.prototype.outputDOMStructure = function(container) {
   var o = [];
-  o.push('<h1>', this.displayName, '</h1>');
+  o.push('<h1 class="controller-name">', this.displayName, '</h1>');
+  o.push('<button class="controller-action" id="add', this.name, '">Ajouter ', this.displayName, '</button>');
   o.push('<div id="', this.name, 'sList"></div>');
-  o.push('<hr/><button id="add', this.name, '">Ajouter ', this.displayName, '</button><hr/>');
-  o.push('<ul id="', this.name, 's"></ul>');
+  //o.push('<ul id="', this.name, 's" class="item-big-container"></ul>');
   $(container).html(o.join(''));
 }
 
 
-ControllerView.prototype.applyDBToViewTransformationsForItem = function(dbItem) {
-  this.browseModelView(dbItem, function(attr, attrView, value) {
-    dbItem[attrView.id] = this.applyDBToViewValue(attrView.type, value);
-  }.bind(this));
-  return dbItem;
-};
 
 ControllerView.prototype.applyDBToViewValue = function(type, value) {
   switch (type) {
@@ -96,11 +58,12 @@ ControllerView.prototype.applyDBToViewValue = function(type, value) {
   return value;
 };
 
-ControllerView.prototype.getItem = function(DOMitem, callback) {
-  this.pp.socket.emit("get" + this.name + "Item", DOMitem, function(err, dbItem) {
-    dbItem = this.applyDBToViewTransformationsForItem(dbItem);
-    return callback(err, dbItem);
+
+ControllerView.prototype.applyDBToViewTransformationsForItem = function(dbItem) {
+  this.browseModelView(dbItem, function(attr, attrView, value) {
+    dbItem[attrView.id] = this.applyDBToViewValue(attrView.type, value);
   }.bind(this));
+  return dbItem;
 };
 
 
@@ -112,120 +75,23 @@ ControllerView.prototype.applyDBToViewTransformationsForItems = function(items) 
 };
 
 
-
-ControllerView.prototype.getAllSetClickEvents = function(items) {
-  _.each(items, function(item) {
-    var id = "#list-item-" + this.name + "-" + item._id;
-    $(id).click(function(e) {
-      this.getItem(item, function(err, dbItem) {
-        this.createDOM({
-          "item": dbItem
-        });
-      }.bind(this));
-    }.bind(this));
-  }.bind(this));
+ControllerView.prototype.outputComboBox = function(o, cbValues, selected, attrID) {
+  o.push("<select id='", this.getAttrDOMID(attrID), "' class='combobox'>");
+  _.each(cbValues, function(cbV) {
+    o.push("<option value='", cbV.value, "' ", (cbV.value === selected) ? "selected='selected' " : "", ">");
+    o.push(cbV.name, "</option>");
+  });
+  o.push("</select>");
 };
 
-ControllerView.prototype.getAll = function() {
-  this.pp.socket.emit("get" + this.name + "s", {}, function(err, items) {
-    var o = [];
-    items = this.applyDBToViewTransformationsForItems(items);
-    listIt(o, this.name, items, this.outputOne);
-    $("#" + this.name + "sList").html(o.join(''));
-    this.getAllSetClickEvents(items);
-
-  }.bind(this));
-}
-
-
-ControllerView.prototype.getClassDOMID = function() {
-  return this.name + "-" + this.item._id;
-}
-
-ControllerView.prototype.createDOM = function(data) {
-
-  this.item = data.item;
-
-  this.createDOMOutputEditAttr();
-  this.createDOMDoJSActions();
-  this.createDOMAddJSEditAttrUpdate();
-}
-
-
-ControllerView.prototype.createInputForAttr = function(o, attr, attrView, value) {
-  switch (attrView.type) {
-  case "Enum":
-    o.push("<select>");
-    _.each(attrView.enumValues, function(eV) {
-      o.push("<option value='", eV, "' ", (eV === value) ? "selected" : "", ">");
-      o.push(ev, "</option>");
-    });
-    o.push("</select>");
-    //$("#" +this.getAttrDOMID(attrView.id)).
-    break;
-  default:
-    o.push("<input id='", this.getAttrDOMID(attrView.id), "' value='", value, "'/>");
-    break;
-  }
-
-};
-
-ControllerView.prototype.createDOMOutputEditAttr = function() {
-  var o = [];
-  o.push("<li class='", this.name, "' id='", this.getClassDOMID() + "'>");
-  o.push("<button id='delete-", this.getClassDOMID(), "' data-item-id='", this.item._id, "'>Supprimer</button>");
-  o.push("<ul id='edit-list-", this.getClassDOMID() + "' class='", this.name, "'>");
-  this.browseModelView(this.item, function(attr, attrView, value) {
-    o.push("<li class='", this.getClassDOMID(), "-structure edit-attr'>");
-    o.push(attrView.name, " : ");
-    o.push("</li>");
-  }.bind(this));
-  o.push("</ul>");
-  o.push("</li>");
-  $("#" + this.name + "s").html(o.join(''));
-};
-
-ControllerView.prototype.createDOMDoJSActions = function() {
-  this.browseModelView(this.item, function(attr, attrView, value) {
-    switch (attrView.type) {
-    case "Time":
-      setTimePicker(this.getAttrDOMID(attrView.id));
-      break;
-    case "Enum":
-      //$("#" +this.getAttrDOMID(attrView.id)).
-      break;
-    }
-  }.bind(this));
-};
-
-
-ControllerView.prototype.createDOMAddJSEditAttrUpdate = function() {
-
-  // UPDATE AFTER FOCUS OUT
-  $("#" + this.getClassDOMID() + " .edit-attr").focusout(function(e) {
-    this.update();
-  }.bind(this));
-
-  // DELETE ON CLICK ON DELETE BUTTON
-  var deleteID = "#delete-" + this.getClassDOMID();
-  $(deleteID).click(function(e) {
-    var id = $(deleteID).attr('data-item-id');
-    this.pp.socket.emit("delete" + this.name + "Item", {
-      "controller": this.name,
-      "id": id
-    }, function(err) {
-      $("#" + this.name + "-" + id).fadeOut();
-      this.getAll();
-    }.bind(this));
-  }.bind(this));
-
-};
 
 ControllerView.prototype.browseModelView = function(item, callback) {
-  _.each(this.model, function(attr) {
-    var attrView = this.modelView[attr.name];
-    if (!_.isUndefined(attrView)) {
-      var value = item[attrView.id];
+  //console.log(this.model);
+  _.each(this.attributes, function(attr) {
+    var attrView = this.model[attr];
+    //console.log("Attr", this.model, attr, attrView);
+    if (!_.isUndefined(attr)) {
+      var value = item[attr];
       callback(attr, attrView, value);
     }
   }.bind(this));
@@ -238,34 +104,22 @@ ControllerView.prototype.getAttrDOMID = function(id) {
 }
 
 
-ControllerView.prototype.updateItemFromDOM = function() {
-  this.browseModelView({}, function(attr, attrView, itemValue) {
-    var DOMValue = $("#" + this.getAttrDOMID(attrView.id)).val();
-    switch (attrView.type) {
-    case "Time":
-      this.item[attrView.id] = cvAttrTools.timeToDate(DOMValue).toISOString();
-      break;
-    default:
-      this.item[attrView.id] = DOMValue;
-      break;
-    }
-  }.bind(this));
-};
-
 ControllerView.prototype.catchError = function(err) {
-  $("#err-zone").html(err.message);
-  $("#err-zone").fadeIn(500, function() {
-    $("#err-zone").fadeOut(2000);
+  var message = err;
+  if (_.isObject(err)) {
+    message = err.message;
+  }
+
+  $("#err-zone").html(message);
+  $("#err-zone").fadeIn(250, function() {
+    $("#err-zone").fadeOut(1000);
   });
 }
 
-ControllerView.prototype.update = function() {
 
-  this.updateItemFromDOM();
-  this.pp.socket.emit("update" + this.name, this.item, function(err, dt) {
-    if (err) {
-      return this.catchError(err);
-    }
-    this.getAll();
-  }.bind(this));
+ControllerView.prototype.addMessage = function(message) {
+  $("#message-zone").html(message);
+  $("#message-zone").fadeIn(500, function() {
+    $("#message-zone").fadeOut(5000);
+  });
 };

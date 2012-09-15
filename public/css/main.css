@@ -4,13 +4,16 @@ body{
 }
 
 
-li.dayStep{
-	height: 120px;
-	border: 1px solid green;
+li.item-big{
+  list-style: none;
+  border: 1px solid blue;
+  padding: 5px;
+}
+
+li.edit-attr{
 	list-style: none;	
 }
-input{
-	height: 30px;
+input, select{
 	width: 400px;
 	text-align: center;
 	font-size: 16px;
@@ -18,34 +21,45 @@ input{
 	background-color: #eee;
 }
 
+li.edit-attr ul, li.edit-attr div.label{
+  display: inline-block;
+  vertical-align: top;
+
+}
+
+.edit-attr div.label{
+  width: 200px;
+  display: inline-block;
+  text-align: right;
+  padding-right: 10px;
+   font-size: 1.1em;
+}
+
+li.edit-attr{
+  margin: 5px;
+  margin-bottom: 15px;
+}
+
+a.ui-combobox-toggle, input, select{
+	height: 26px;
+	padding: 2px;	
+	vertical-align: top;
+}
+
 span.ui-state-hover{
 	background-color: green;
 }
 
-#steps, ul.structure, #DayTemplates, .DayTemplate{
+#steps, ul.structure, .item-big-container, .item-big{
 	margin: 0px;
 	padding: 0px;	
 }
 
-.list-item:hover{
-	cursor: pointer;
-}
 
 #steps{
 	margin-bottom: 5px;
 }
 
-
-li.daystep-structure{
-	display: inline-block;
-	text-align: center;
-	min-width: 100px;
-	padding: 5px;
-
-}
-div.daystart{
-	height: 120px;
-}
 
 li{
 	border-radius: 5px;
@@ -54,6 +68,8 @@ li{
 button{
 	margin: 5px;
 }
+
+
 
 #body-container{
 	margin-left: 5px;
@@ -110,8 +126,67 @@ nav a {
 
 #err-zone{
 	background-color: red;
-	font-size: 1.2em;
-	padding: 5px;
+	font-size: 3em;
+	padding: 20px;
+  text-align: center;
 	color:white;
 	display: none;
+  opacity: 0.8;
+}
+
+#message-zone{
+  background-color: green;
+  font-size: 1.0em;
+  padding: 5px;
+  text-align: center;
+  color:white;
+  display: none !important;
+  opacity: 0.8;
+  width: 100%;
+  position: absolute;
+  top:0px;
+
+}
+
+h1{
+
+  font-size: 14px;
+}
+
+
+#empty{
+  display: none;
+}
+
+ul.list {
+  padding-left: 20px;
+  margin:0px;
+}
+
+ul.list li.list-item{
+ /* list-style: none;*/
+}
+
+
+div.item-actions{
+  width: 100px;
+  display: inline-block;
+}
+
+
+ul.edit-list{
+  margin: 0px;
+  padding: 0px;
+}
+
+button.item-action, ul.edit-list{
+  display: inline-block;
+  vertical-align: top;
+}
+
+button.controller-action{
+  display: inline-block;
+}
+h1.controller-name{
+  display: inline-block;
 }

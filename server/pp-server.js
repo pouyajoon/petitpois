@@ -42,10 +42,10 @@ new Server(serverOptions, function(err, _server) {
 
 
   _server.io.sockets.on('connection', function(socket) {
-    console.log('connected');
+    //console.log('connected');
 
     socket.on('getControllers', function(callback) {
-      console.log("getControllers", moaSchema.modelControllers);
+      //console.log("getControllers", moaSchema.modelControllers);
       return callback(moaSchema.modelControllers);
     });
 
@@ -55,8 +55,8 @@ new Server(serverOptions, function(err, _server) {
       var cAPI = require("./classes/ControllerAPI");
       var api = new cAPI(model);
 
-      //var classFile = require('./classes/' + className);
 
+      //var classFile = require('./classes/' + className);
       socket.on('delete' + className + 'Item', function(data, callback) {
         var id = data.id;
         var classInstance = new model();
@@ -64,7 +64,7 @@ new Server(serverOptions, function(err, _server) {
         classInstance.getOne({
           '_id': data.id
         }, function(err, dbItem) {
-          console.log('get item', err, data, dbItem);
+          //console.log('get item', err, data, dbItem);
           if (dbItem != null) {
             dbItem.remove();
             return callback(err);
@@ -73,7 +73,7 @@ new Server(serverOptions, function(err, _server) {
       });
 
       socket.on('add' + className, function(data, callback) {
-        console.log("add");
+        // /console.log("add");
         api.create(function(err, item) {
           var res = {};
           res.model = api.getModel();
@@ -85,16 +85,20 @@ new Server(serverOptions, function(err, _server) {
 
 
       socket.on('get' + className + 'Model', function(data, callback) {
+        //console.log("getmodel", api.getModel())
+
         return callback(null, api.getModel());
       });
 
       socket.on('get' + className + 'Item', function(data, callback) {
         var classInstance = new model();
         classInstance.model = model;
+
+        var attributes = api.getModel();
         classInstance.getOne({
           '_id': data._id
         }, function(err, dbItem) {
-          console.log('get item', err, data, dbItem);
+          //console.log('get item', err, data, dbItem);
           if (dbItem != null) {
             return callback(err, dbItem);
           }
@@ -102,7 +106,8 @@ new Server(serverOptions, function(err, _server) {
       });
 
       socket.on('get' + className + 's', function(data, callback) {
-        api.getItems(function(err, items) {
+
+        api.getItems(data.filter, function(err, items) {
           return callback(err, items);
         });
       });
@@ -114,9 +119,17 @@ new Server(serverOptions, function(err, _server) {
           '_id': data._id
         }, function(err, item) {
           if (item != null) {
-            _.each(api.getModel(), function(attr) {
-              item[attr.name] = data[attr.name];
-            });
+            var models = api.getModel();
+            for (var attr in api.getModel()){
+              if (models.hasOwnProperty(attr)){
+                //var attrModel = models[attr];
+                item[attr] = data[attr];  
+              }
+            }
+            // _.each(api.getModel(), function(attr) {
+            //console.log(item);
+              
+            // });
             return item.saveToDB(callback);
           }
         });

@@ -16,8 +16,9 @@ DataBaseItem.prototype.setup = function(model, callback) {
 DataBaseItem.prototype.saveToDB = function(callback){
   //console.log("saveToDB");
   this.save(function(err){
-    //console.log("save done", err);
-    if (err) return callback(err, this);
+    //console.log("save done", err, err.message);
+    if (err) return callback(err.message, this);
+//    console.log("err send done", err);
     return callback(null, this);
   }.bind(this));
   //return callback(null, this);

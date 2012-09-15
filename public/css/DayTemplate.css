@@ -1,4 +1,4 @@
-li.list-item-DayTemplate{
+/*li.list-item-DayTemplate{
   width: 100px;
   text-align: center;
   padding: 5px;
@@ -9,15 +9,4 @@ li.list-item-DayTemplate{
   list-style: none;
 }
 
-li.DayTemplate{
-  list-style: none;
-  border: 1px solid blue;
-  padding: 5px;
-}
-
-.DayTemplate li.edit-attr{
-  border: 1px solid green;
-  list-style: none;
-  padding: 5px;
-  min-height: 120px;
-}
+*/
