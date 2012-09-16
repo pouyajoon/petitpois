@@ -1,5 +1,4 @@
 ControllerView.prototype.createInputForAttr = function(o, attr, attrView, value) {
-  //console.log(attrView, attr);
   switch (attrView.type) {
   case "Enum":
     var cbValues = [];
@@ -10,32 +9,23 @@ ControllerView.prototype.createInputForAttr = function(o, attr, attrView, value)
       });
     });
     this.outputComboBox(o, cbValues, value, attrView.id);
-    //$("#" +this.getAttrDOMID(attrView.id)).
     break;
-
   case "HasOne":
-    //o.push("<span id='", this.getAttrDOMID(attrView.id), "'></span>");
-    //    this.outputComboBox(o, ["hop"], value);
-    //$("#" +this.getAttrDOMID(attrView.id)).
     break;
   case "HasMany":
     break;
-
-
-  case "ExternalItems":
-    o.push("<div id='", this.getAttrDOMID(attrView.id), "'></div>");
-
-    // o.push("<ul id='",this.getAttrDOMID(attrView.id),"'>");
-    // o.push('</ul>');
-    break;
   default:
-    o.push("<input class='ui-widget ui-widget-content' id='", this.getAttrDOMID(attrView.id), "' value='", value, "'/>");
+    var readOnly = "";
+    if (attrView.readOnly === true) {
+      readOnly = " readonly='readonly' ";
+    }
+    o.push("<input type='text' ", readOnly, " class='ui-widget ui-widget-content' id='", this.getAttrDOMID(attrView.id), "' value=\"", value, "\"/>");
     break;
   }
 };
 
 
-ControllerView.prototype.createDOMDoActionsForInput = function() {
+ControllerView.prototype.createDOMDoActionsForInput = function(containerControllerID) {
   this.browseModelView(this.item, function(attr, attrView, value) {
     switch (attrView.type) {
     case "HasOne":
@@ -48,71 +38,80 @@ ControllerView.prototype.createDOMDoActionsForInput = function() {
           $(containerID).after(o.join(''));
           this.setComboBoxes(attrView);
         }.bind(this));
-        //console.log(attrView.controller, "loaded");
       }.bind(this));
 
       break;
     case 'HasMany':
-      //console.log(attr, attrView, value);
       this.pp.loadController(attrView.controller, "#empty", function(err, viewController) {
         var filter = {};
         filter[this.name] = this.item._id;
-
+        viewController.containerControllerID = this.name;
         viewController.getItemsByFilter(filter, function(err, items) {
-
+          var options = [];
+          options.push("<li class='has-many-options'>");
+          viewController.outputControllerActionButtons(options, this.getAttrDOMID(attrView.id));
+          options.push("</li>")
           var o = [];
 
-          viewController.outputListItems(o, items);
-          //listIt(o, viewController.name, items, viewController.outputOne.bind(this));
-          //o.push('<ul class="HasMany-list">');
-
+          viewController.outputListItems(o, items, this.getAttrDOMID(attrView.id), options.join(''));
           $('#' + this.getAttrDOMID(attrView.id) + "-structure").append(o.join(''));
-
+          var f = {
+            "name": this.name,
+            "value": filter[this.name]
+          };
+          viewController.registerAddEvent(this.getAttrDOMID(attrView.id), [f]);
           viewController.getAllSetClickEvents(items);
+          $("#list-" + this.getAttrDOMID(attrView.id)).sortable({
+            "stop": function(s) {
+              //console.log("stop", s);
+              var orderedItems = [];
+              $("#list-" + this.getAttrDOMID(attrView.id) + " li.list-item").each(function(order, li) {
+                var oItem = {
+                  "_id": $(li).attr("data-item-id"),
+                  "order": order
+                };
+                orderedItems.push(oItem);
+              }.bind(this));
+              viewController.updateAll(orderedItems, function(err) {
+                viewController.addMessage("Update all done.")
+                //console.log('update-all', err);
+              });
+            }.bind(this)
+          }).bind(this);
 
-          // $.each(items, function(i, item) {
-          //   this.item = item;
-          //   $("#" + this.getListItemID()).append('<ul id="' + this.name + 's-' + item._id + '"></ul>');
-          //   $("#" + this.getListItemID() + " a").click(function(e) {
-          //     console.log("click on", item);
-          //     this.getAllSetClickEvents(items);
-          //   }.bind(this));
-
-          // }.bind(viewController));
-
-          //o.push('</ul>');
-          //console.log(items);
         }.bind(this));
 
       }.bind(this));
-
       break;
-      // case "ExternalItems":
-      //   //o.push("<div id='", this.getAttrDOMID(attrView.id), "'></div>");
-      //   // o.push("<ul id='",this.getAttrDOMID(attrView.id),"'>");
-      //   // o.push('</ul>');
-      //   this.pp.loadController(attr.externalSchema, "#" + this.getAttrDOMID(attrView.id) + "-structure", function(err, viewController) {
-      //     console.log(attr.externalSchema, "loaded");
-      //   });
-      //   break;
     }
+    if (attrView.hidden === true) {
+       $('#' + this.getAttrDOMID(attrView.id) + "-structure").hide();
+    }
+
+
   }.bind(this));
 
 };
 
 
+// ControllerView.prototype.getListItemsID = function() {
+//   return "list-" + this.getClassDOMID();
+// };
 ControllerView.prototype.getListItemID = function() {
   return "list-item-" + this.getClassDOMID();
 };
 
 ControllerView.prototype.createDOMOutputEditAttr = function(container) {
   var o = [];
-  o.push("<li class='", this.name, " item-big' id='", this.getClassDOMID() + "'>");
-  o.push('<div class="item-actions">');
+  o.push("<div class='", this.name, " item-big' id='", this.getClassDOMID() + "'>");
+  o.push("<ul id='edit-list-", this.getClassDOMID() + "' class='", this.name, " edit-list'>");
+
+  o.push('<li class="item-actions">');
   o.push("<button class='item-action' id='close-", this.getClassDOMID(), "' data-item-id='", this.item._id, "'>Fermer</button>");
   o.push("<button class='item-action' id='delete-", this.getClassDOMID(), "' data-item-id='", this.item._id, "'>Supprimer</button>");
-  o.push('</div>');
-  o.push("<ul id='edit-list-", this.getClassDOMID() + "' class='", this.name, " edit-list'>");
+  o.push('</li>');
+
+  //o.push("<li class='item-name'>", this.outputOne(this.item), "</li>");
   this.browseModelView(this.item, function(attr, attrView, value) {
     o.push("<li id='", this.getAttrDOMID(attrView.id), "-structure' class='", this.getClassDOMID(), "-structure edit-attr'>");
     o.push("<div class='label'>", attrView.displayName, " : </div>");
@@ -120,7 +119,7 @@ ControllerView.prototype.createDOMOutputEditAttr = function(container) {
     o.push("</li>");
   }.bind(this));
   o.push("</ul>");
-  o.push("</li>");
+  o.push("</div>");
   $(container).html(o.join(''));
   this.createDOMDoActionsForInput();
 
@@ -128,8 +127,6 @@ ControllerView.prototype.createDOMOutputEditAttr = function(container) {
 };
 
 ControllerView.prototype.setComboBoxes = function(attrView) {
-  //combobox().next().children('input')
-  //console.log("#" + this.getAttrDOMID(attrView.id));
   $("#" + this.getAttrDOMID(attrView.id)).change(this.update.bind(this)); // attr('id', this.getAttrDOMID(attrView.id)).change(this.update);
 };
 
@@ -137,9 +134,11 @@ ControllerView.prototype.createDOMDoJSActions = function() {
   this.browseModelView(this.item, function(attr, attrView, value) {
     switch (attrView.type) {
     case "Time":
-      $('#' + this.getAttrDOMID(attrView.id)).timepicker({
-        onSelect: this.update.bind(this)
-      });
+      if (!attrView.readOnly) {
+        $('#' + this.getAttrDOMID(attrView.id)).timepicker({
+          onSelect: this.update.bind(this)
+        });
+      }
       break;
     case "Enum":
       this.setComboBoxes(attrView);
@@ -153,14 +152,13 @@ ControllerView.prototype.createDOMAddJSEditAttrUpdate = function() {
 
   // UPDATE AFTER FOCUS OUT
   $("#" + this.getClassDOMID() + " .edit-attr input").focusout(function(e) {
-    //console.log('focus out');
     this.update();
   }.bind(this));
 
-  
-var itemDOMID = "#" + this.getListItemID();
+
+  var itemDOMID = "#" + this.getListItemID();
   var item = this.item;
-  
+  //console.log("register items options : itemDOMID", itemDOMID, this.containerControllerID);
   // DELETE ON CLICK ON DELETE BUTTON
   var deleteID = "#delete-" + this.getClassDOMID();
   $(deleteID).click(function(e) {
@@ -170,42 +168,48 @@ var itemDOMID = "#" + this.getListItemID();
       "id": id
     }, function(err) {
       this.item = item;
-      $("#" + this.getListItemID()).fadeOut(function(){
-        $(this).remove();
-      });
+      $("#" + this.getListItemID()).remove();
     }.bind(this));
   }.bind(this));
 
-  // CLOSE EVENT
+  // CLOSE ON CLICK ON CLOSE BUTTON
   var closeID = "#close-" + this.getClassDOMID();
   $(closeID).click(function(e) {
-    this.getItem(item, function(err, dbItem) {
+    this.update(function(err, dbItem) {
       var o = [];
       this.item = dbItem;
       this.getListItemLink(o, dbItem);
       $(itemDOMID).html(o.join(''));
       this.registerClickEditMode();
     }.bind(this));
+
+    // this.getItem(item, function(err, dbItem) {
+    // }.bind(this));
   }.bind(this));
-
-
-
 };
 
 
 
 ControllerView.prototype.getListItemLink = function(output, item) {
-  output.push('<a>', this.outputOne(output, this.item), '</a>');
+  var o = this.outputOne(item).trim();
+  if (o.length === 0) {
+    o = item._id;
+  }
+
+  output.push('<a>', o, '</a>');
 };
 
 ControllerView.prototype.outputListItem = function(output) {
-  output.push('<li id="', this.getListItemID(), '" class="list-item list-item-', this.name, '">');
+  output.push('<li data-item-id="', this.item._id, '" id="', this.getListItemID(), '" class="list-item list-item-', this.name, '">');
   this.getListItemLink(output, this.item);
   output.push('</li>');
 }
 
-ControllerView.prototype.outputListItems = function(output, items) {
-  output.push('<ul id="', this.name, '-list" class="list">');
+ControllerView.prototype.outputListItems = function(output, items, id, firstLine) {
+  output.push('<ul id="list-', id, '" class="list">');
+  if (!_.isUndefined(firstLine)) {
+    output.push(firstLine);
+  }
   _.each(items, function(item) {
     this.item = item;
     this.outputListItem(output);
@@ -215,10 +219,12 @@ ControllerView.prototype.outputListItems = function(output, items) {
 
 
 ControllerView.prototype.createDOM = function(data, container) {
-
   this.item = data.item;
-  //console.log(this.item);
   this.createDOMOutputEditAttr(container);
   this.createDOMDoJSActions();
   this.createDOMAddJSEditAttrUpdate();
+
+  if (!_.isUndefined(this.containerControllerID)) {
+    $("#" + this.getClassDOMID() + "-" + this.containerControllerID + "-structure").hide();
+  }
 }

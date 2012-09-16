@@ -3,6 +3,8 @@ var DataBaseItem = require("./DataBaseItem");
 var mongoose = require('mongoose');
 require('mongoose-types').loadTypes(mongoose);
 
+
+exports.mongoose = mongoose;
 // exports.ZoneSchema = new mongoose.Schema({
 //   "id" : {"type": String, "index": {"unique" : true}},
 //   "ants" : [{"type" : mongoose.Schema.ObjectId, "ref" : exports.AntSchema}]
@@ -36,6 +38,13 @@ exports.DayStepSchema = new mongoose.Schema({
     "displayName": "Durée",
     "viewType": "Time"
   },
+  "startTime": {
+    "type": Date,
+    "displayName": "Horraire Début",
+    "viewType": "Time",
+    "readOnly" : true,
+    'hidden' : true
+  },
   "stepType": {
     "type": String,
     'enum': exports.DayStepSchemaTypes,
@@ -48,6 +57,10 @@ exports.DayStepSchema = new mongoose.Schema({
     "controller": "DayTemplate",
     "displayName": "Journée type",
     "viewType": "HasOne"
+  },
+  "order" : {
+    "type" : Number,
+    "default" : 0
   }
 });
 
@@ -69,6 +82,39 @@ exports.DayTemplateSchema = new mongoose.Schema({
   }
 });
 
+exports.SkillSubDomainSchema = new mongoose.Schema({
+  "name": {
+    "type": String,
+    "displayName": "Nom"
+  },
+  "skills": {
+    "type": [exports.SkillSchema],
+    "controller": "Skill",
+    "displayName": "Compétences",
+    "viewType": "HasMany"
+  },
+  "SkillDomain": {
+    "type": mongoose.Schema.ObjectId,
+    "ref": exports.SkillDomainSchema,
+    "controller": "SkillDomain",
+    "displayName": "Domaine",
+    "viewType": "HasOne"
+  }
+});
+
+
+exports.SkillDomainSchema = new mongoose.Schema({
+  "name": {
+    "type": String,
+    "displayName": "Nom"
+  },
+  "SkillSubDomains": {
+    "type": [exports.SkillSubDomainSchema],
+    "controller": "SkillSubDomain",
+    "displayName": "Sous-Domaines",
+    "viewType": "HasMany"
+  }
+});
 
 exports.SkillSchema = new mongoose.Schema({
   "name": {
@@ -79,15 +125,17 @@ exports.SkillSchema = new mongoose.Schema({
     "type": String,
     "displayName": "Description"
   },
-  //"children": [exports.SkillSchema],
-  "parent": {
+  "SkillSubDomain": {
     "type": mongoose.Schema.ObjectId,
-    "ref": exports.SkillSchema,
-    "controller": "Skill",
-    "displayName": "Parent",
+    "ref": exports.SkillSubDomainSchema,
+    "controller": "SkillSubDomain",
+    "displayName": "Sous-Domaine",
     "viewType": "HasOne"
   }
 });
+
+
+
 
 exports.UserSchema = new mongoose.Schema({
   "email": {
@@ -102,7 +150,7 @@ exports.UserSchema = new mongoose.Schema({
 });
 
 
-exports.modelControllers = ["DayTemplate", "Studient", "Skill", "DayStep"];
+exports.modelControllers = ["DayTemplate", "Studient", "Skill", "DayStep", "SkillDomain", "SkillSubDomain"];
 
 _.each(exports.modelControllers, function(controllerName) {
   var modelName = controllerName + "Model";
@@ -110,3 +158,6 @@ _.each(exports.modelControllers, function(controllerName) {
   exports[modelName] = mongoose.model(controllerName, exports[schemaName]);
   require('./../classes/heritate').implement(exports[modelName], require("./DataBaseItem"));
 });
+
+require('./../classes/heritate').implement(exports.DayStepModel, require("./../classes/DayStep").API);
+

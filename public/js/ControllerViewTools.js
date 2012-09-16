@@ -33,6 +33,12 @@ cvAttrTools.dateToTime = function(dateString) {
 
 
 cvAttrTools.timeToDate = function(time) {
+  if (_.isUndefined(time) || time.length === 0) {
+    var d = new Date();
+    d.setTime(0);
+    return d;
+  }
+
   var hours = time.substring(0, 2);
   var minutes = time.substring(3);
   var timeDate = new Date(); //Date(0000, 00, 00, hours, minutes, 00);

@@ -4,41 +4,41 @@ var _ = require('underscore');
 var DayTemplateModel = moaSchema.DayTemplateModel;
 
 
-DayTemplateModel.prototype.setup = function(callback){
-  this.model = DayTemplateModel;
-  this.name = "";
-  this.startTime = null;
-  this.steps = [];
+// DayTemplateModel.prototype.setup = function(callback){
+//   this.model = DayTemplateModel;
+//   this.name = "";
+//   this.startTime = null;
+//   this.steps = [];
 
-// this.getOne({"name" : "q"}, function(err, dt){
-// 	console.log(err, dt, "updated DayTemplate");
-// });  
+// // this.getOne({"name" : "q"}, function(err, dt){
+// // 	console.log(err, dt, "updated DayTemplate");
+// // });  
 
-  return this.saveToDB(callback);
-};
+//   return this.saveToDB(callback);
+// };
 
 
-exports.getItems = function(callback){
-	DayTemplateModel.find({}, function(err, data){
-		return callback(null, data);
-	});
-};
+// exports.getItems = function(callback){
+// 	DayTemplateModel.find({}, function(err, data){
+// 		return callback(null, data);
+// 	});
+// };
 
-exports.getModel = function(){
-  var models = [];
-  _.each(DayTemplateModel.schema.paths, function(attr){
-    var model = {};
-    model.name = attr.path;
-    model.type = attr.options.type.name;
-    models.push(model);
-  });
-  return models;
-};
+// exports.getModel = function(){
+//   var models = [];
+//   _.each(DayTemplateModel.schema.paths, function(attr){
+//     var model = {};
+//     model.name = attr.path;
+//     model.type = attr.options.type.name;
+//     models.push(model);
+//   });
+//   return models;
+// };
 
-exports.create = function(callback){
-  var a = new DayTemplateModel();
-  return a.setup(callback);
-};
+// exports.create = function(callback){
+//   var a = new DayTemplateModel();
+//   return a.setup(callback);
+// };
 
 exports.Model = DayTemplateModel;
 

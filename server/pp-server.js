@@ -43,7 +43,6 @@ new Server(serverOptions, function(err, _server) {
 
   _server.io.sockets.on('connection', function(socket) {
     //console.log('connected');
-
     socket.on('getControllers', function(callback) {
       //console.log("getControllers", moaSchema.modelControllers);
       return callback(moaSchema.modelControllers);
@@ -77,7 +76,8 @@ new Server(serverOptions, function(err, _server) {
         api.create(function(err, item) {
           var res = {};
           res.model = api.getModel();
-          console.log("model", res.model);
+          //console.log("model", res.model, item);
+          console.log(item);
           res.item = item;
           return callback(err, res);
         });
@@ -85,54 +85,63 @@ new Server(serverOptions, function(err, _server) {
 
 
       socket.on('get' + className + 'Model', function(data, callback) {
-        //console.log("getmodel", api.getModel())
-
         return callback(null, api.getModel());
       });
 
       socket.on('get' + className + 'Item', function(data, callback) {
-        var classInstance = new model();
-        classInstance.model = model;
-
-        var attributes = api.getModel();
-        classInstance.getOne({
-          '_id': data._id
-        }, function(err, dbItem) {
-          //console.log('get item', err, data, dbItem);
-          if (dbItem != null) {
-            return callback(err, dbItem);
-          }
-        });
+        return api.getItem(data, callback);
       });
 
       socket.on('get' + className + 's', function(data, callback) {
-
-        api.getItems(data.filter, function(err, items) {
-          return callback(err, items);
-        });
+        //console.log("data.filter", data.filter);
+        return api.getItems(data.filter, callback);
       });
 
-      socket.on('update' + className, function(data, callback) {
+
+      socket.on('updateAll' + className, function(data, callback) {
+
+
+        var updated = 1;
+
+        function checkUpdates() {
+          //console.log(updated, data.items.length);
+          if (updated >= data.items.length - 1) {
+            return callback(null);
+          }
+          updated += 1;
+        }
+
         var classInstance = new model();
         classInstance.model = model;
-        classInstance.getOne({
-          '_id': data._id
-        }, function(err, item) {
-          if (item != null) {
-            var models = api.getModel();
-            for (var attr in api.getModel()){
-              if (models.hasOwnProperty(attr)){
-                //var attrModel = models[attr];
-                item[attr] = data[attr];  
+        var models = api.getModel();
+
+        _.each(data.items, function(item) {
+
+          //console.log(className, "received", item);
+          classInstance.getOne({
+            '_id': item._id
+          }, function(err, gItem) {
+            console.log("get", gItem);
+            if (gItem != null) {
+              for (var attr in models) {
+                if (models.hasOwnProperty(attr)) {
+                  if (!_.isUndefined(item[attr])) {
+                    gItem[attr] = item[attr];
+                  }
+                }
               }
+              return gItem.saveToDB(checkUpdates);
             }
-            // _.each(api.getModel(), function(attr) {
-            //console.log(item);
-              
-            // });
-            return item.saveToDB(callback);
-          }
-        });
+          });
+
+
+        })
+
+      });
+
+
+      socket.on('update' + className, function(data, callback) {
+        api.updateItem(data, callback);
       });
     });
 

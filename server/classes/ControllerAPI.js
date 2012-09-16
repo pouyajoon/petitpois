@@ -4,35 +4,58 @@ var mongoose = require('mongoose');
 
 var ControllerAPI = function(model) {
     this.model = model;
+    this.modelItem = new this.model();
+    this.modelItem.model = model;
+    this.modelAttributes = this.getModel();
   };
+
 
 ControllerAPI.prototype.getItems = function(filter, callback) {
   console.log("filter", filter);
-
   var nfilter = {};
-  var model= this.getModel();
-  for (var f in filter){
-    if (filter.hasOwnProperty(f)){
-      if (!_.isUndefined(model[f])){
-        var attr = model[f];
-        switch(attr.type){
-          case "HasOne" :
-            nfilter[f] = mongoose.Types.ObjectId(filter[f]);
+  for (var f in filter) {
+    if (filter.hasOwnProperty(f)) {
+      if (!_.isUndefined(this.modelAttributes[f])) {
+        var attr = this.modelAttributes[f];
+        switch (attr.type) {
+        case "HasOne":
+          nfilter[f] = mongoose.Types.ObjectId(filter[f]);
           break;
-          default :
+        default:
           nfilter[f] = filter[f];
           break;
         }
       }
     }
   }
+  this.model.find(nfilter).sort("order").exec(callback);
+};
 
-  console.log("nfilter", nfilter); 
 
-  this.model.find(nfilter, function(err, items) {
-    console.log('res', items, err);
-    return callback(null, items);
+ControllerAPI.prototype.getItem = function(item, callback) {
+  this.modelItem.getOne({
+    '_id': item._id
+  }, function(err, dbItem) {
+    if (dbItem != null) {
+      return callback(err, dbItem);
+    }
   });
+}
+
+ControllerAPI.prototype.updateItem = function(item, callback) {
+  this.modelItem.getOne({
+    '_id': item._id
+  }, function(err, dbItem) {
+    if (dbItem != null) {
+      var models = this.getModel();
+      for (var attr in models) {
+        if (models.hasOwnProperty(attr)) {
+          dbItem[attr] = item[attr];
+        }
+      }
+      return dbItem.saveToDB(callback);
+    }
+  }.bind(this));
 };
 
 ControllerAPI.prototype.create = function(callback) {
@@ -51,6 +74,16 @@ ControllerAPI.prototype.getModel = function() {
     if (!_.isUndefined(attr.options.viewType)) {
       model.type = attr.options.viewType;
       model.controller = attr.options.controller;
+    }
+
+    model.readOnly = false;
+    if (!_.isUndefined(attr.options.readOnly)) {
+      model.readOnly = attr.options.readOnly;
+    }
+
+    model.hidden = false;
+    if (!_.isUndefined(attr.options.hidden)) {
+      model.hidden = attr.options.hidden;
     }
 
     if (model.type === 'ObjectId') {

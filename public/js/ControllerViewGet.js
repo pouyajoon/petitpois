@@ -9,7 +9,7 @@ ControllerView.prototype.getItem = function(DOMitem, callback) {
 
 
 
-ControllerView.prototype.registerClickEditMode = function() {
+ControllerView.prototype.registerClickEditMode = function(containerControllerID) {
   var id = "#" + this.getListItemID();
   var item = this.item;
   $(id + " a").on('click.edit-item', function(e) {
@@ -18,7 +18,7 @@ ControllerView.prototype.registerClickEditMode = function() {
       this.item = dbItem.item;
       this.createDOM({
         "item": dbItem
-      }, id);
+      }, id, containerControllerID);
     }.bind(this));
   }.bind(this));
 }
@@ -48,7 +48,7 @@ ControllerView.prototype.getAll = function() {
   this.pp.socket.emit("get" + this.name + "s", {}, function(err, items) {
     var o = [];
     items = this.applyDBToViewTransformationsForItems(items);
-    this.outputListItems(o, items);
+    this.outputListItems(o, items, this.name);
     $("#" + this.name + "sList").html(o.join(''));
     this.getAllSetClickEvents(items);
 

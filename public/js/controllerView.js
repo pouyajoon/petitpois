@@ -12,20 +12,41 @@ ControllerView.prototype.init = function(pp, name, displayName, modelView) {
   this.modelView = {};
 };
 
-ControllerView.prototype.setup = function(container, callback) {
-  this.outputDOMStructure(container);
-  $("#add" + this.name).click(function(e) {
+
+ControllerView.prototype.outputOne = function(item) {
+  return item.name + " *";
+}
+
+ControllerView.prototype.registerAddEvent = function(id, extraAttributes) {
+  //console.log("Add register", id, extraAttributes);
+//  var containerControllerID = this.containerControllerID;
+  $("#add" + id).click(function(e) {
+
     this.pp.socket.emit('add' + this.name, {}, function(err, dbItem) {
+      //console.log("add", id, dbItem);
       var o = [];
-      dbItem = this.applyDBToViewTransformationsForItem(dbItem);
+      dbItem.item = this.applyDBToViewTransformationsForItem(dbItem.item);
       this.item = dbItem.item;
+      //console.log(this.item);
+      if (!_.isUndefined(extraAttributes)){
+        _.each(extraAttributes, function(eAttr){
+          this.item[eAttr.name] = eAttr.value;
+        }.bind(this));        
+      }
       this.outputListItem(o);
-      $("#" + this.name + "-list").append(o.join(''));
-      this.registerClickEditMode(this.item);            
+      $("#list-" + id).append(o.join(''));
+
+      this.registerClickEditMode(); 
+//      this.containerControllerID = containerControllerID;         
       this.createDOM(dbItem, "#" + this.getListItemID());
 
     }.bind(this));
   }.bind(this));
+};
+
+ControllerView.prototype.setup = function(container, callback) {
+  this.setOptionsHTML(container);
+  this.registerAddEvent(this.name);
   this.pp.socket.emit("get" + this.name + "Model", {}, function(err, model) {
     this.model = model;
     return callback(null, this);
@@ -38,12 +59,19 @@ ControllerView.prototype.getClassDOMID = function() {
 }
 
 
-ControllerView.prototype.outputDOMStructure = function(container) {
+ControllerView.prototype.outputControllerActionButtons = function(output, id) {
+  output.push('<button class="controller-action" id="add', id, '">Ajouter ', this.displayName, '</button>');
+};
+
+ControllerView.prototype.outputOptionsHTML = function(output) {
+  output.push('<h1 class="controller-name">', this.displayName, '</h1>');
+  this.outputControllerActionButtons(output, this.name);
+  output.push('<div id="', this.name, 'sList"></div>');
+};
+
+ControllerView.prototype.setOptionsHTML = function(container) {
   var o = [];
-  o.push('<h1 class="controller-name">', this.displayName, '</h1>');
-  o.push('<button class="controller-action" id="add', this.name, '">Ajouter ', this.displayName, '</button>');
-  o.push('<div id="', this.name, 'sList"></div>');
-  //o.push('<ul id="', this.name, 's" class="item-big-container"></ul>');
+  this.outputOptionsHTML(o);
   $(container).html(o.join(''));
 }
 

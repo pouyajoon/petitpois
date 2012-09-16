@@ -4,10 +4,10 @@ body{
 }
 
 
-li.item-big{
-  list-style: none;
-  border: 1px solid blue;
+div.item-big{
+  border: 1px solid #aaa;
   padding: 5px;
+  border-radius: 5px;
 }
 
 li.edit-attr{
@@ -21,18 +21,26 @@ input, select{
 	background-color: #eee;
 }
 
-li.edit-attr ul, li.edit-attr div.label{
+li.edit-attr ul, li.edit-attr div.label, .has-many-options{
   display: inline-block;
   vertical-align: top;
+}
 
+li.has-many-options{
+  margin-left:-20px;
+}
+
+ul.list{
+  
 }
 
 .edit-attr div.label{
-  width: 200px;
+  width: 150px;
   display: inline-block;
   text-align: right;
   padding-right: 10px;
    font-size: 1.1em;
+   height: 100%;
 }
 
 li.edit-attr{
@@ -163,20 +171,26 @@ ul.list {
   margin:0px;
 }
 
-ul.list li.list-item{
+li.list-item a{
  /* list-style: none;*/
+ font-size: 1.2em;
 }
 
 
-div.item-actions{
-  width: 100px;
-  display: inline-block;
+
+li.item-actions, li.item-name{
+  list-style: none;
 }
 
+li.item-name{
+  text-align: center;
+  font-size: 1.2em;
+}
 
 ul.edit-list{
   margin: 0px;
   padding: 0px;
+  width: 100%;
 }
 
 button.item-action, ul.edit-list{
