@@ -24,13 +24,18 @@ var pageHome = {
   'view': 'home.jade'
 };
 
+var pageFillDay = {
+  'path': '/fillDay',
+  'view': 'fillDay.jade'
+};
+
 // var pageTest = {"path" : "/test", "view" : "test/test.jade", "renderOptions" : {"drawMode" : 'map'}};
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/pp');
 
 var serverOptions = {
   port: 8081,
-  paths: [pageHome, pageController]
+  paths: [pageHome, pageController, pageFillDay]
 };
 //pageAddDayTemplate
 console.log('hi');
