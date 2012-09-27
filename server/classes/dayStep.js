@@ -1,7 +1,7 @@
-var moaSchema = require('../db/moaSchema');
+var ppSchema = require('../db/ppSchema');
 var _ = require('underscore');
 
-var DayStepModel = moaSchema.DayStepModel;
+var DayStepModel = ppSchema.DayStepModel;
 
 
 // DayStepModel.prototype.setup = function(startTime, duration, callback){
@@ -35,7 +35,7 @@ DayStepAPI.prototype.doCustomActionAfterSave = function(err, item, callback) {
 
 
 
-  var dayTemplateAPI = new cAPI(moaSchema.DayTemplateModel);
+  var dayTemplateAPI = new cAPI(ppSchema.DayTemplateModel);
   var filter = {
     "_id": item.DayTemplate
   };
@@ -58,23 +58,23 @@ DayStepAPI.prototype.doCustomActionAfterSave = function(err, item, callback) {
           itemsUpdated += 1;
         }
 
-        var i = 0;
+      var i = 0;
       _.each(items, function(dbItem) {
-        if (i === 0){
+        if (i === 0) {
           dbItem.startTime = currentTime;
         } else {
           var newTime = new Date();
           newTime.setTime(currentTime.getTime() + dbItem.duration.getTime());
-    
+
           dbItem.startTime = newTime;
 
         }
-        
-        
+
+
         currentTime = dbItem.startTime;
-//        console.log("newTime", newTime, "start time", dbItem.startTime);
-        if (item._id === dbItem._id){
-          item.startTime = dbItem.startTime;          
+        //        console.log("newTime", newTime, "start time", dbItem.startTime);
+        if (item._id === dbItem._id) {
+          item.startTime = dbItem.startTime;
         }
 
         dbItem.save(itemUpdated);

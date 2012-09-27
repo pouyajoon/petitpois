@@ -63,6 +63,9 @@ ControllerAPI.prototype.create = function(callback) {
   return item.setup(this.model, callback);
 };
 
+
+
+
 ControllerAPI.prototype.getModel = function() {
   var models = {};
   _.each(this.model.schema.paths, function(attr) {

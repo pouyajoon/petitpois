@@ -1,6 +1,7 @@
 body{
 	    font: 400 12px/1.5 "Open Sans",sans-serif;
 	    margin:0px;
+      margin-top: 60px;
 }
 
 input, textarea{
@@ -246,4 +247,49 @@ textarea.activities{
   background-color: #eee;
   border: none;
   height: 100px;
+}
+
+
+
+
+table.calendar{
+  width: 100%;
+}
+
+table.calendar th{
+  width: 14.28%;
+  border-collapse: collapse;
+}
+table.calendar td{
+  height: 80px;
+  vertical-align: top;
+}
+
+table.calendar td div.header{
+
+  width: 100%;
+  
+  font-size: 0.9em;
+}
+
+table.calendar th, table.calendar td{
+  border-bottom: 1px solid #eee;
+  border-right: 1px solid #eee;
+}
+
+.small{
+  font-size: 0.8em;
+}
+
+ul.small{
+  margin: 0px;
+  padding: 0px;
+}
+
+ul.small li{
+  list-style: none;
+}
+
+.day-header{
+  margin-bottom: 5px;
 }

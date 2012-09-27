@@ -35,6 +35,13 @@ ControllerView.prototype.updateItemFromDOM = function() {
     case "Time":
       this.item[attrView.id] = cvAttrTools.timeToDate(DOMValue).toISOString();
       break;
+    case "Date":
+    var d = cvAttrTools.shortDateToDate(DOMValue).toISOString();
+      this.item[attrView.id] = d;
+      //console.log("u", d);
+      break;
+
+
     case "HasOne":
       //console.log("hasOne", attrView, this.item, DOMValue);
       this.item[attrView.id] = DOMValue;

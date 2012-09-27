@@ -6,9 +6,6 @@ ControllerView.prototype.getItem = function(DOMitem, callback) {
 };
 
 
-
-
-
 ControllerView.prototype.registerClickEditMode = function(containerControllerID) {
   var id = "#" + this.getListItemID();
   var item = this.item;
@@ -32,24 +29,35 @@ ControllerView.prototype.getAllSetClickEvents = function(items) {
 
 
 ControllerView.prototype.getItemsForComboBoxes = function(nameKey, callback) {
-  this.pp.socket.emit("get" + this.name + "s", {}, function(err, items) {
+  this.getItemsByFilter({}, function(err, items) {
     var res = [];
     _.each(items, function(i) {
       res.push({
-        "name": i[nameKey],
+        "name": this.outputOne(i),
         "value": i._id
       });
-    });
+    }.bind(this));
     callback(err, res);
   }.bind(this));
 };
 
-ControllerView.prototype.getAll = function() {
-  this.pp.socket.emit("get" + this.name + "s", {}, function(err, items) {
+
+ControllerView.prototype.getOneAndOutput = function() {
+  this.getItemsByFilter({}, function(err, items) {
     var o = [];
-    items = this.applyDBToViewTransformationsForItems(items);
     this.outputListItems(o, items, this.name);
     $("#" + this.name + "sList").html(o.join(''));
+    this.getAllSetClickEvents(items);
+
+  }.bind(this));
+}
+
+
+ControllerView.prototype.getAndOutput = function(filter, container) {
+  this.getItemsByFilter(filter, function(err, items) {
+    var o = [];
+    this.outputListItems(o, items, this.name);
+    $(container).html(o.join(''));
     this.getAllSetClickEvents(items);
 
   }.bind(this));

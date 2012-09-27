@@ -32,6 +32,39 @@ cvAttrTools.dateToTime = function(dateString) {
 }
 
 
+cvAttrTools.dateToShortDate = function(dateString) {
+
+  if (_.isUndefined(dateString)) {
+    return null;
+  }
+  var d = new Date(dateString);
+  var res = $.datepicker.formatDate('dd/mm/yy', d);
+  //var res = d.toString("yyyy/MM/dd");
+  //console.log(res);
+  return res;
+}
+
+
+cvAttrTools.shortDateToDate = function(shortDate) {
+  if (_.isUndefined(shortDate) || shortDate.length === 0) {
+    var d = new Date();
+    d.setTime(0);
+    return d;
+  }
+
+  var l = shortDate.split("/");
+
+  l[1] = parseInt(l[1]) - 1;
+  var date = new Date(l[2], l[1], l[0]); //Date(0000, 00, 00, hours, minutes, 00);
+  //console.log("d", date);
+  return date;
+}
+
+Date.prototype.toPPString = function(){
+  return $.datepicker.formatDate('yy/mm/dd', this);
+}
+
+
 cvAttrTools.timeToDate = function(time) {
   if (_.isUndefined(time) || time.length === 0) {
     var d = new Date();

@@ -1,5 +1,5 @@
-var moaSchema = require("./moaSchema");
-var UserModel = moaSchema.UserModel;
+var ppSchema = require("./ppSchema");
+var UserModel = ppSchema.UserModel;
 var _ = require('underscore');
 
 

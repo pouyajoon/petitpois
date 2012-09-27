@@ -3,8 +3,8 @@ var libAuth = require('./autentication');
 var qs = require('querystring');
 var crypto = require('crypto');
 var User = require('./user');
-var moaSchema = require('./../db/moaSchema');
-var UserModel = moaSchema.UserModel;
+var ppSchema = require('./../db/ppSchema');
+var UserModel = ppSchema.UserModel;
 
 module.exports = function(server){
 

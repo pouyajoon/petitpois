@@ -5,6 +5,7 @@ require('mongoose-types').loadTypes(mongoose);
 
 
 exports.mongoose = mongoose;
+exports.schemas = {};
 // exports.ZoneSchema = new mongoose.Schema({
 //   "id" : {"type": String, "index": {"unique" : true}},
 //   "ants" : [{"type" : mongoose.Schema.ObjectId, "ref" : exports.AntSchema}]
@@ -15,7 +16,7 @@ exports.mongoose = mongoose;
 //   _user : { type: mongoose.Schema.ObjectId, ref: exports.UserSchema }
 // });
 // exports.InventoryModel = mongoose.model('InventoryModel', exports.InventorySchema);
-exports.StudientSchema = new mongoose.Schema({
+exports.schemas.StudientSchema = new mongoose.Schema({
   "firstname": {
     "type": String,
     "displayName": "Prénom"
@@ -27,12 +28,15 @@ exports.StudientSchema = new mongoose.Schema({
   "birthdate": {
     "type": Date,
     "displayName": "Date de naissance"
+    //"viewType": "Date"
   }
 });
 
+
+
 exports.DayStepSchemaTypes = ["ateliers", "regroupement", "accueils", "aide personnalisée", "motricité", "temps calme", "language-lecture", "jeux mathématiques", "travail collectif", "cantine", "récréation"];
 
-exports.DayStepSchema = new mongoose.Schema({
+exports.schemas.DayStepSchema = new mongoose.Schema({
   "duration": {
     "type": Date,
     "displayName": "Durée",
@@ -42,8 +46,8 @@ exports.DayStepSchema = new mongoose.Schema({
     "type": Date,
     "displayName": "Horraire Début",
     "viewType": "Time",
-    "readOnly" : true,
-    'hidden' : true
+    "readOnly": true,
+    'hidden': true
   },
   "stepType": {
     "type": String,
@@ -53,49 +57,74 @@ exports.DayStepSchema = new mongoose.Schema({
   },
   "DayTemplate": {
     "type": mongoose.Schema.ObjectId,
-    "ref": exports.DayTemplate,
+    "ref": exports.schemas.DayTemplate,
     "controller": "DayTemplate",
     "displayName": "Journée type",
     "viewType": "HasOne"
   },
-  "order" : {
-    "type" : Number,
-    "default" : 0
+  "order": {
+    "type": Number,
+    "default": 0,
+    "displayName": "Ordre"
   }
 });
 
-exports.DayTemplateSchema = new mongoose.Schema({
-  "daySteps": {
-    "type": [exports.DayStepSchema],
+
+exports.schemas.DayBookSchema = new mongoose.Schema({
+  "dayDate": {
+    "type": Date,
+    "displayName": "Date"
+  },
+  "DayTemplate": {
+    "type": mongoose.Schema.ObjectId,
+    "ref": exports.schemas.DayTemplate,
+    "controller": "DayTemplate",
+    "displayName": "Journée type",
+    "viewType": "HasOne"
+  },
+  "DayStep": {
+    "type": mongoose.Schema.ObjectId,
+    "ref": exports.schemas.DayStep,
     "controller": "DayStep",
-    "displayName": "Etapes",
-    "viewType": "HasMany"
+    "displayName": "Etape",
+    "viewType": "HasOne"
+  }  
+});
+
+
+exports.schemas.DayTemplateSchema = new mongoose.Schema({
+  "name": {
+    "type": String,
+    "displayName": "Nom"
   },
   "startTime": {
     "type": Date,
     "displayName": "Début de la journée",
     "viewType": "Time"
   },
-  "name": {
-    "type": String,
-    "displayName": "Nom"
+  "daySteps": {
+    "type": [exports.schemas.DayStepSchema],
+    "controller": "DayStep",
+    "displayName": "Etapes",
+    "viewType": "HasMany"
   }
+
 });
 
-exports.SkillSubDomainSchema = new mongoose.Schema({
+exports.schemas.SkillSubDomainSchema = new mongoose.Schema({
   "name": {
     "type": String,
     "displayName": "Nom"
   },
   "skills": {
-    "type": [exports.SkillSchema],
+    "type": [exports.schemas.SkillSchema],
     "controller": "Skill",
     "displayName": "Compétences",
     "viewType": "HasMany"
   },
   "SkillDomain": {
     "type": mongoose.Schema.ObjectId,
-    "ref": exports.SkillDomainSchema,
+    "ref": exports.schemas.SkillDomainSchema,
     "controller": "SkillDomain",
     "displayName": "Domaine",
     "viewType": "HasOne"
@@ -103,20 +132,20 @@ exports.SkillSubDomainSchema = new mongoose.Schema({
 });
 
 
-exports.SkillDomainSchema = new mongoose.Schema({
+exports.schemas.SkillDomainSchema = new mongoose.Schema({
   "name": {
     "type": String,
     "displayName": "Nom"
   },
   "SkillSubDomains": {
-    "type": [exports.SkillSubDomainSchema],
+    "type": [exports.schemas.SkillSubDomainSchema],
     "controller": "SkillSubDomain",
     "displayName": "Sous-Domaines",
     "viewType": "HasMany"
   }
 });
 
-exports.SkillSchema = new mongoose.Schema({
+exports.schemas.SkillSchema = new mongoose.Schema({
   "name": {
     "type": String,
     "displayName": "Nom"
@@ -127,7 +156,7 @@ exports.SkillSchema = new mongoose.Schema({
   },
   "SkillSubDomain": {
     "type": mongoose.Schema.ObjectId,
-    "ref": exports.SkillSubDomainSchema,
+    "ref": exports.schemas.SkillSubDomainSchema,
     "controller": "SkillSubDomain",
     "displayName": "Sous-Domaine",
     "viewType": "HasOne"
@@ -136,8 +165,7 @@ exports.SkillSchema = new mongoose.Schema({
 
 
 
-
-exports.UserSchema = new mongoose.Schema({
+exports.schemas.UserSchema = new mongoose.Schema({
   "email": {
     "type": mongoose.SchemaTypes.Email,
     "index": {
@@ -150,14 +178,19 @@ exports.UserSchema = new mongoose.Schema({
 });
 
 
-exports.modelControllers = ["DayTemplate", "Studient", "Skill", "DayStep", "SkillDomain", "SkillSubDomain"];
+//exports.schemas.modelControllers = ["DayTemplate", "Studient", "Skill", "DayStep", "SkillDomain", "SkillSubDomain"];
 
-_.each(exports.modelControllers, function(controllerName) {
-  var modelName = controllerName + "Model";
-  var schemaName = controllerName + "Schema";
-  exports[modelName] = mongoose.model(controllerName, exports[schemaName]);
-  require('./../classes/heritate').implement(exports[modelName], require("./DataBaseItem"));
-});
+exports.modelControllers = [];
+for (var schemaName in exports.schemas) {
+  if (exports.schemas.hasOwnProperty(schemaName)) {
+    var controllerName = schemaName.replace(/Schema/g, "");
+    var modelName = controllerName + "Model";
+    //console.log(schemaName, controllerName, modelName);
+    exports[modelName] = mongoose.model(controllerName, exports.schemas[schemaName]);
+    exports.modelControllers.push(controllerName);
+    require('./../classes/heritate').implement(exports[modelName], require("./DataBaseItem"));
+
+  }
+}
 
 require('./../classes/heritate').implement(exports.DayStepModel, require("./../classes/DayStep").API);
-

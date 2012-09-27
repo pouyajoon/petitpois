@@ -1,6 +1,15 @@
-
+// Object.prototype.getAttrs = function(){
+//   var names = [];
+//   for (var n in this){
+//     if (this.hasOwnProperty(n)){
+//       names.push(n);
+//     }
+//   }
+//   return names;
+// }
 var ControllerView = function() {
-
+    //this.init(pp, name, name);
+    //this.setContainer(container);
   }
 
 
@@ -8,18 +17,28 @@ ControllerView.prototype.init = function(pp, name, displayName, modelView) {
   this.pp = pp;
   this.name = name;
   this.displayName = displayName;
+  this.attributes = [];
   this.item = {};
   this.modelView = {};
+  this.model = this.pp.models[this.name];
+
+  for (var n in this.model) {
+    if (n === '_id') {
+      continue;
+    }
+    this.attributes.push(n);
+  }
+
 };
 
 
 ControllerView.prototype.outputOne = function(item) {
-  return item.name + " *";
+  return item._id + ' - ' + item.name + " *";
 }
 
 ControllerView.prototype.registerAddEvent = function(id, extraAttributes) {
   //console.log("Add register", id, extraAttributes);
-//  var containerControllerID = this.containerControllerID;
+  //  var containerControllerID = this.containerControllerID;
   $("#add" + id).click(function(e) {
 
     this.pp.socket.emit('add' + this.name, {}, function(err, dbItem) {
@@ -28,30 +47,29 @@ ControllerView.prototype.registerAddEvent = function(id, extraAttributes) {
       dbItem.item = this.applyDBToViewTransformationsForItem(dbItem.item);
       this.item = dbItem.item;
       //console.log(this.item);
-      if (!_.isUndefined(extraAttributes)){
-        _.each(extraAttributes, function(eAttr){
+      if (!_.isUndefined(extraAttributes)) {
+        _.each(extraAttributes, function(eAttr) {
           this.item[eAttr.name] = eAttr.value;
-        }.bind(this));        
+        }.bind(this));
       }
       this.outputListItem(o);
       $("#list-" + id).append(o.join(''));
 
-      this.registerClickEditMode(); 
-//      this.containerControllerID = containerControllerID;         
+      this.registerClickEditMode();
+      //      this.containerControllerID = containerControllerID;         
       this.createDOM(dbItem, "#" + this.getListItemID());
 
     }.bind(this));
   }.bind(this));
 };
 
-ControllerView.prototype.setup = function(container, callback) {
+
+
+ControllerView.prototype.setContainer = function(container) {
   this.setOptionsHTML(container);
   this.registerAddEvent(this.name);
-  this.pp.socket.emit("get" + this.name + "Model", {}, function(err, model) {
-    this.model = model;
-    return callback(null, this);
-  }.bind(this));
-}
+};
+
 
 
 ControllerView.prototype.getClassDOMID = function() {
@@ -81,6 +99,9 @@ ControllerView.prototype.applyDBToViewValue = function(type, value) {
   switch (type) {
   case "Time":
     return cvAttrTools.dateToTime(value);
+    break;
+  case "Date":
+    return cvAttrTools.dateToShortDate(value);
     break;
   }
   return value;

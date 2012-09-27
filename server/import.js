@@ -1,4 +1,4 @@
-var moaSchema = require('./db/moaSchema');
+var ppSchema = require('./db/ppSchema');
 
 var mongoose = require("mongoose");
 mongoose.connect('mongodb://localhost/pp');

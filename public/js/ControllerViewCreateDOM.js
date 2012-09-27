@@ -1,4 +1,4 @@
-ControllerView.prototype.createInputForAttr = function(o, attr, attrView, value) {
+ControllerView.prototype.createInputForAttr = function(o, attrView, value) {
   switch (attrView.type) {
   case "Enum":
     var cbValues = [];
@@ -30,62 +30,63 @@ ControllerView.prototype.createDOMDoActionsForInput = function(containerControll
     switch (attrView.type) {
     case "HasOne":
 
-      this.pp.loadController(attrView.controller, "#empty", function(err, viewController) {
-        viewController.getItemsForComboBoxes("name", function(err, cbValues) {
-          var o = [];
-          this.outputComboBox(o, cbValues, value, attrView.id);
-          var containerID = "#" + this.getAttrDOMID(attrView.id) + "-structure div.label";
-          $(containerID).after(o.join(''));
-          this.setComboBoxes(attrView);
-        }.bind(this));
+      var view = this.pp.c(attrView.controller);
+
+      view.getItemsForComboBoxes("name", function(err, cbValues) {
+        var o = [];
+        this.outputComboBox(o, cbValues, value, attrView.id);
+        var containerID = "#" + this.getAttrDOMID(attrView.id) + "-structure div.label";
+        $(containerID).after(o.join(''));
+        this.setComboBoxes(attrView);
       }.bind(this));
 
       break;
     case 'HasMany':
-      this.pp.loadController(attrView.controller, "#empty", function(err, viewController) {
-        var filter = {};
-        filter[this.name] = this.item._id;
-        viewController.containerControllerID = this.name;
-        viewController.getItemsByFilter(filter, function(err, items) {
-          var options = [];
-          options.push("<li class='has-many-options'>");
-          viewController.outputControllerActionButtons(options, this.getAttrDOMID(attrView.id));
-          options.push("</li>")
-          var o = [];
+      var viewController = this.pp.c(attrView.controller);
 
-          viewController.outputListItems(o, items, this.getAttrDOMID(attrView.id), options.join(''));
-          $('#' + this.getAttrDOMID(attrView.id) + "-structure").append(o.join(''));
-          var f = {
-            "name": this.name,
-            "value": filter[this.name]
-          };
-          viewController.registerAddEvent(this.getAttrDOMID(attrView.id), [f]);
-          viewController.getAllSetClickEvents(items);
-          $("#list-" + this.getAttrDOMID(attrView.id)).sortable({
-            "stop": function(s) {
-              //console.log("stop", s);
-              var orderedItems = [];
-              $("#list-" + this.getAttrDOMID(attrView.id) + " li.list-item").each(function(order, li) {
-                var oItem = {
-                  "_id": $(li).attr("data-item-id"),
-                  "order": order
-                };
-                orderedItems.push(oItem);
-              }.bind(this));
-              viewController.updateAll(orderedItems, function(err) {
-                viewController.addMessage("Update all done.")
-                //console.log('update-all', err);
-              });
-            }.bind(this)
-          }).bind(this);
+      var filter = {};
+      filter[this.name] = this.item._id;
+      viewController.containerControllerID = this.name;
+      viewController.getItemsByFilter(filter, function(err, items) {
+        var options = [];
+        options.push("<li class='has-many-options'>");
+        viewController.outputControllerActionButtons(options, this.getAttrDOMID(attrView.id));
+        options.push("</li>")
+        var o = [];
 
-        }.bind(this));
+        viewController.outputListItems(o, items, this.getAttrDOMID(attrView.id), options.join(''));
+        $('#' + this.getAttrDOMID(attrView.id) + "-structure").append(o.join(''));
+        var f = {
+          "name": this.name,
+          "value": filter[this.name]
+        };
+        viewController.registerAddEvent(this.getAttrDOMID(attrView.id), [f]);
+        viewController.getAllSetClickEvents(items);
+        $("#list-" + this.getAttrDOMID(attrView.id)).sortable({
+          "stop": function(s) {
+            //console.log("stop", s);
+            var orderedItems = [];
+            $("#list-" + this.getAttrDOMID(attrView.id) + " li.list-item").each(function(order, li) {
+              var oItem = {
+                "_id": $(li).attr("data-item-id"),
+                "order": order
+              };
+              orderedItems.push(oItem);
+            }.bind(this));
+            viewController.updateAll(orderedItems, function(err) {
+              viewController.addMessage("Update all done.")
+              //console.log('update-all', err);
+            });
+          }.bind(this)
+        }).bind(this);
 
       }.bind(this));
+
+
       break;
     }
     if (attrView.hidden === true) {
-       $('#' + this.getAttrDOMID(attrView.id) + "-structure").hide();
+      $('#' + this.getAttrDOMID(attrView.id) + "-structure").hide();
     }
 
 
@@ -115,7 +116,7 @@ ControllerView.prototype.createDOMOutputEditAttr = function(container) {
   this.browseModelView(this.item, function(attr, attrView, value) {
     o.push("<li id='", this.getAttrDOMID(attrView.id), "-structure' class='", this.getClassDOMID(), "-structure edit-attr'>");
     o.push("<div class='label'>", attrView.displayName, " : </div>");
-    this.createInputForAttr(o, attr, attrView, value);
+    this.createInputForAttr(o, attrView, value);
     o.push("</li>");
   }.bind(this));
   o.push("</ul>");
@@ -123,7 +124,10 @@ ControllerView.prototype.createDOMOutputEditAttr = function(container) {
   $(container).html(o.join(''));
   this.createDOMDoActionsForInput();
 
+};
 
+ControllerView.prototype.outputDOMEditAttr = function(first_argument) {
+  // body...
 };
 
 ControllerView.prototype.setComboBoxes = function(attrView) {
@@ -132,6 +136,7 @@ ControllerView.prototype.setComboBoxes = function(attrView) {
 
 ControllerView.prototype.createDOMDoJSActions = function() {
   this.browseModelView(this.item, function(attr, attrView, value) {
+    //console.log(attrView);
     switch (attrView.type) {
     case "Time":
       if (!attrView.readOnly) {
@@ -140,20 +145,32 @@ ControllerView.prototype.createDOMDoJSActions = function() {
         });
       }
       break;
+    case "Date":
+      if (!attrView.readOnly) {
+        var val = $('#' + this.getAttrDOMID(attrView.id)).val();
+        $('#' + this.getAttrDOMID(attrView.id)).datepicker({
+          onChange: this.update.bind(this)
+        }).datepicker("option", "showAnim", "drop").datepicker( "option", "dateFormat", "dd/mm/yy").datepicker("setDate",  val);
+      }
+      break;
     case "Enum":
       this.setComboBoxes(attrView);
       break;
+    default:
+      // UPDATE AFTER FOCUS OUT
+      $("#" + this.getAttrDOMID(attrView.id)).focusout(function(e) {
+        this.update();
+      }.bind(this));
+
     }
   }.bind(this));
+
+
 };
 
 
 ControllerView.prototype.createDOMAddJSEditAttrUpdate = function() {
 
-  // UPDATE AFTER FOCUS OUT
-  $("#" + this.getClassDOMID() + " .edit-attr input").focusout(function(e) {
-    this.update();
-  }.bind(this));
 
 
   var itemDOMID = "#" + this.getListItemID();

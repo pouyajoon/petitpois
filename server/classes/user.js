@@ -1,11 +1,11 @@
-var moaSchema = require('../db/moaSchema');
+var ppSchema = require('../db/ppSchema');
 //var Ant = require ('./ant');
 var _ = require('underscore');
 
-var UserModel = moaSchema.UserModel;
+var UserModel = ppSchema.UserModel;
 // var Inventory = require ('./Inventory');
-// var InventoryModel = moaSchema.InventoryModel;
-// var AntModel = moaSchema.AntModel;
+// var InventoryModel = ppSchema.InventoryModel;
+// var AntModel = ppSchema.AntModel;
 
 
 UserModel.prototype.setup = function(_email, _password, callback){

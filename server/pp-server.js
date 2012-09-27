@@ -24,10 +24,10 @@ var pageHome = {
   'view': 'home.jade'
 };
 
-var pageFillDay = {
-  'path': '/fillDay',
-  'view': 'fillDay.jade'
-};
+// var pageFillDay = {
+//   'path': '/fillDay',
+//   'view': 'fillDay.jade'
+// };
 
 // var pageTest = {"path" : "/test", "view" : "test/test.jade", "renderOptions" : {"drawMode" : 'map'}};
 var mongoose = require('mongoose');
@@ -35,27 +35,47 @@ mongoose.connect('mongodb://localhost/pp');
 
 var serverOptions = {
   port: 8081,
-  paths: [pageHome, pageController, pageFillDay]
+  paths: [pageHome, pageController]
 };
 //pageAddDayTemplate
 console.log('hi');
 
+
+
+function getModels(ppSchema) {
+  var models = {};
+  _.each(ppSchema.modelControllers, function(className) {
+    var model = ppSchema[className + "Model"];
+    var cAPI = require("./classes/ControllerAPI");
+    var api = new cAPI(model);
+
+    models[className] = api.getModel();
+  });
+  return models;
+}
+
 new Server(serverOptions, function(err, _server) {
   console.log('game initialized, error : ', err);
 
-  var moaSchema = require('./db/moaSchema');
+  var ppSchema = require('./db/ppSchema');
 
 
   _server.io.sockets.on('connection', function(socket) {
     //console.log('connected');
     socket.on('getControllers', function(callback) {
-      //console.log("getControllers", moaSchema.modelControllers);
-      return callback(moaSchema.modelControllers);
+      //console.log("getControllers", ppSchema.modelControllers);
+      return callback(ppSchema.modelControllers);
     });
 
-    _.each(moaSchema.modelControllers, function(className) {
+    socket.on('getModels', function(data, callback) {
+      var models = getModels(ppSchema);
+      return callback(null, models);
+    });
 
-      var model = moaSchema[className + "Model"];
+
+    _.each(ppSchema.modelControllers, function(className) {
+
+      var model = ppSchema[className + "Model"];
       var cAPI = require("./classes/ControllerAPI");
       var api = new cAPI(model);
 
@@ -138,13 +158,8 @@ new Server(serverOptions, function(err, _server) {
               return gItem.saveToDB(checkUpdates);
             }
           });
-
-
         })
-
       });
-
-
       socket.on('update' + className, function(data, callback) {
         api.updateItem(data, callback);
       });
