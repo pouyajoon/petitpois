@@ -1,7 +1,7 @@
 
 ControllerView.prototype.update = function(callback) {
   this.updateItemFromDOM();
-  //console.log(this.item);
+  console.log(this.item);
   this.pp.socket.emit("update" + this.name, this.item, function(err, dbItem) {
     //console.log("update api answer", err, this.item);
     if (err) {
@@ -16,7 +16,10 @@ ControllerView.prototype.update = function(callback) {
 
 
 ControllerView.prototype.updateAll = function(items, callback){
-  this.pp.socket.emit("updateAll" + this.name, {"items" : items}, function(err) {
+  var data = {};
+  data.items = items;
+  data.parentController = this.containerControllerID;
+  this.pp.socket.emit("updateAll" + this.name, data, function(err) {
     //console.log("update all api answer", err);
     if (err) {
       return this.catchError(err);

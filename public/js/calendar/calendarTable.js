@@ -6,6 +6,9 @@ var CalendarTable = function() {
 
 
 
+    this.appendInDay = function(o, id, date) {}
+
+
     function outputHeader(o) {
       o.push("<tr>");
       for (var i = 0; i < daysNames.length; i += 1) {
@@ -64,7 +67,6 @@ var CalendarTable = function() {
       // set month and year in top field
       //form.oneMonth.value = theMonths[theMonth] + " " + theYear
       // fill fields of table
-      
       for (var i = 0; i < 43; i++) {
 
         var tdID = "#" + that.id + "-day-" + i;
@@ -77,29 +79,34 @@ var CalendarTable = function() {
           var theDay = i - firstDay + 1;
           $(tdID).children(".day-header").html(theDay).addClass("ok");
           var date = new Date(theYear, theMonth - 1, theDay);
-          var o = [];
-          that.appendInDay(o, i, date);
-          $(tdID).children(".day-body").html(o.join(''));
+          if (!_.isUndefined(this.appendInDay)) {
+            var o = [];
+            this.appendInDay(o, i, date);
+            $(tdID).children(".day-body").html(o.join(''));
+
+          }
         }
       }
 
     }
 
 
-    function appendTable(container) {
+
+
+    function setTable(container) {
       var table = outputTable();
-      $(container).append(table);
-      that.doJSActions();
+      $(container).html(table);
+      //that.doJSActions();
     }
     return {
-      "appendTable": appendTable,
-      "fillDays": fillDays
+      "setTable": setTable,
+      "fillDays": fillDays,
+      "appendInDay" : that.appendInDay,
+      "monthsNames" : monthsNames
     };
 
   };
 
-CalendarTable.prototype.appendInDay = function(o, id, date) {
-}
+CalendarTable.prototype.appendInDay = function(o, id, date) {}
 
-CalendarTable.prototype.doJSActions = function() {
-}
+CalendarTable.prototype.doJSActions = function() {}

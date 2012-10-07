@@ -28,7 +28,6 @@ var pageHome = {
 //   'path': '/fillDay',
 //   'view': 'fillDay.jade'
 // };
-
 // var pageTest = {"path" : "/test", "view" : "test/test.jade", "renderOptions" : {"drawMode" : 'map'}};
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/pp');
@@ -56,7 +55,6 @@ function getModels(ppSchema) {
 
 new Server(serverOptions, function(err, _server) {
   console.log('game initialized, error : ', err);
-
   var ppSchema = require('./db/ppSchema');
 
 
@@ -80,6 +78,7 @@ new Server(serverOptions, function(err, _server) {
       var api = new cAPI(model);
 
 
+
       //var classFile = require('./classes/' + className);
       socket.on('delete' + className + 'Item', function(data, callback) {
         var id = data.id;
@@ -89,7 +88,7 @@ new Server(serverOptions, function(err, _server) {
           '_id': data.id
         }, function(err, dbItem) {
           //console.log('get item', err, data, dbItem);
-          if (dbItem != null) {
+          if(dbItem != null) {
             dbItem.remove();
             return callback(err);
           }
@@ -102,7 +101,7 @@ new Server(serverOptions, function(err, _server) {
           var res = {};
           res.model = api.getModel();
           //console.log("model", res.model, item);
-          console.log(item);
+          //console.log(item);
           res.item = item;
           return callback(err, res);
         });
@@ -126,35 +125,49 @@ new Server(serverOptions, function(err, _server) {
       socket.on('updateAll' + className, function(data, callback) {
 
 
+        console.log("updateALL", data);
         var updated = 1;
 
-        function checkUpdates() {
-          //console.log(updated, data.items.length);
-          if (updated >= data.items.length - 1) {
-            return callback(null);
-          }
-          updated += 1;
-        }
 
         var classInstance = new model();
         classInstance.model = model;
         var models = api.getModel();
 
+        function checkUpdates(err, item) {
+          //console.log(updated, err, item, data.items.length);
+          if(updated >= data.items.length) {
+            //console.log("check Update", item);
+            api.reorderHasOneControllers(item[data.parentController], function(err, parentItem) {
+              console.log("parent ITEM", parentItem);
+              if(_.isFunction(classInstance.doAfterUpdateAll)) {
+                return classInstance.doAfterUpdateAll(err, item, null, callback);
+              } else {
+                return callback(null);
+              }
+            });
+
+            //api.reorderHasOneControllers(item[0])
+            //console.log("doAfterUpdateAll", classInstance.doAfterUpdateAll);
+          }
+          updated += 1;
+        }
+
         _.each(data.items, function(item) {
 
           //console.log(className, "received", item);
-          classInstance.getOne({
+          api.getItem({
             '_id': item._id
           }, function(err, gItem) {
-            console.log("get", gItem);
-            if (gItem != null) {
-              for (var attr in models) {
-                if (models.hasOwnProperty(attr)) {
-                  if (!_.isUndefined(item[attr])) {
+            //console.log("get", gItem);
+            if(gItem != null) {
+              for(var attr in models) {
+                if(models.hasOwnProperty(attr)) {
+                  if(!_.isUndefined(item[attr])) {
                     gItem[attr] = item[attr];
                   }
                 }
               }
+              console.log("saved", gItem);
               return gItem.saveToDB(checkUpdates);
             }
           });

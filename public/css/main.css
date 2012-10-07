@@ -18,7 +18,12 @@ div.item-big{
 li.edit-attr{
 	list-style: none;	
 }
-input, select{
+
+.pp-hidden-attr{
+  display: none;
+}
+
+.edit-attr input, .edit-attr select{
 	width: 400px;
 	text-align: center;
 	font-size: 16px;
@@ -172,9 +177,10 @@ nav a {
 }
 
 h1{
-  height: 60px;
   margin: 0px;
   font-size: 14px;
+  margin-bottom: 5px;
+  padding-bottom: 0px;
 }
 
 
@@ -292,4 +298,26 @@ ul.small li{
 
 .day-header{
   margin-bottom: 5px;
+}
+
+
+.item-action-delete{
+  float :right;
+}
+
+.pp-search-zone li{
+ display: inline-block;
+ margin:5px;
+}
+
+
+
+.list-item-Day{
+  min-width: 140px;
+  min-height: 80px;
+  border: 1px solid #ddd;
+  display: inline-block;
+  padding: 5px;
+  margin:2px;
+  vertical-align: top;
 }

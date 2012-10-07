@@ -105,7 +105,7 @@ Server.prototype.setRoutes = function (){
     var renderOptions = {
       "layout" : false,
       "server" : 'http://' + this.webServer + '/',
-      "title" : p.title || "Petit Poids",
+      "title" : p.title || "Petit Pois",
       "controller" : ""
     }
     if (typeof p.renderOptions !== "undefined"){

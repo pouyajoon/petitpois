@@ -3,7 +3,9 @@ var PetitPoids = function(callback) {
 
     this.customMenuLinks = ["ViewFillDay", "ViewCalendar"];
 
-    this.urlParams = updateURLParams();
+
+    this.getURLParams = getURLParams;
+    this.urlParams = this.getURLParams();
 
     this.socket.on('connect', function(data) {
       this.loadModelControllers(function(controllers) {
@@ -13,6 +15,8 @@ var PetitPoids = function(callback) {
     }.bind(this));
 
     setupScroll();
+
+
 
     // this.socket.on('data', function(data) {
     //   $.each(data.studients, function(i, s) {
@@ -25,7 +29,6 @@ var PetitPoids = function(callback) {
     function initDefaultViews(err, callback) {
       _.each(this.controllers, function(cname) {
         //window[cname] = new ControllerView();
-
       }.bind(this));
     }
 
@@ -34,7 +37,7 @@ var PetitPoids = function(callback) {
 
         var stop = $(window).scrollTop();
         //console.log("scroll", stop);
-        if (stop === 0) {
+        if(stop === 0) {
           $("#top-menu-container").removeClass('scrolling');
         } else {
           $("#top-menu-container").addClass('scrolling');
@@ -42,7 +45,7 @@ var PetitPoids = function(callback) {
       });
     }
 
-    function updateURLParams() {
+    function getURLParams() {
       var match, pl = /\+/g,
         // Regex for replacing addition symbol with a space
         search = /([^&=]+)=?([^&]*)/g,
@@ -52,11 +55,19 @@ var PetitPoids = function(callback) {
         query = window.location.search.substring(1),
         urlParams = {};
 
-      while (match = search.exec(query))
+      while(match = search.exec(query))
       urlParams[decode(match[1])] = decode(match[2]);
       return urlParams;
     }
   }
+
+
+PetitPoids.prototype.loadControllerAsMainContent = function(controller) {
+  var c = this.c(controller);
+  c.setContainer('#body-container');
+  c.getAndOutput({}, "#" + controller + "sList");
+}
+
 
 
 PetitPoids.prototype.loadController = function(name, container, callback) {
@@ -69,11 +80,24 @@ PetitPoids.prototype.loadController = function(name, container, callback) {
 
 }
 
+
+PetitPoids.prototype.loadView = function(controller) {
+  if(!_.isUndefined(controller) && !_.isUndefined(this.models[controller])) {
+    this.loadControllerAsMainContent(controller);
+  } else {
+    if(_.include(this.customMenuLinks, controller)) {
+      window[controller](this);
+    }
+  }
+
+};
+
 PetitPoids.prototype.getModels = function(err, callback) {
   this.socket.emit('getModels', {}, function(err, models) {
     this.models = models;
+    console.log(models);
     _.each(this.controllers, function(cname) {
-      if (!_.isUndefined(window[cname])) {
+      if(!_.isUndefined(window[cname])) {
         cvTools.heritate(window[cname], ControllerView);
       }
     });
@@ -85,7 +109,7 @@ PetitPoids.prototype.getModels = function(err, callback) {
 
 PetitPoids.prototype.c = function(cname) {
   var controller;
-  if (_.isUndefined(window[cname])) {
+  if(_.isUndefined(window[cname])) {
     controller = new ControllerView();
   } else {
     controller = new window[cname]();
@@ -118,4 +142,45 @@ PetitPoids.prototype.outputMenu = function(menuActive) {
 
   o.push("</nav>");
   $("#top-menu-container").html(o.join(''));
+
+  var that = this;
+  $("nav a").click(function(e) {
+    var title = $(this).html();
+    that.loadPageFromLink(title, this);
+    return false;
+  });
+
+  window.onpopstate = this.onpopstate.bind(this);
+};
+
+
+PetitPoids.prototype.onpopstate = function(event) {
+  //console.log("event", event, event.state);
+  this.loadPage(event.state.controller, event.state.url, false);
+};
+
+PetitPoids.prototype.loadPage = function(controller, url, pushHistoryState) {
+  var pushState = true;
+  if(!_.isUndefined(pushHistoryState)) {
+    pushState = pushHistoryState;
+  }
+  $("nav a.active").removeClass("active");
+  //console.log(url);
+  $("nav a").filter(function(i) {
+    return $(this).text() === controller;
+  }).addClass("active");
+  if(pushState) {
+    var state = {
+      "controller": controller,
+      "url": url
+    };
+    window.history.pushState(state, controller, url);
+  }
+  this.urlParams = this.getURLParams();
+  this.loadView(controller);
+};
+
+PetitPoids.prototype.loadPageFromLink = function(controller, sourceLink) {
+  var url = $(sourceLink).attr('href');
+  this.loadPage(controller, url);
 };

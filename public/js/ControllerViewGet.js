@@ -1,6 +1,7 @@
 ControllerView.prototype.getItem = function(DOMitem, callback) {
   this.pp.socket.emit("get" + this.name + "Item", DOMitem, function(err, dbItem) {
     dbItem = this.applyDBToViewTransformationsForItem(dbItem);
+    //console.log("get item", dbItem);
     return callback(err, dbItem);
   }.bind(this));
 };
@@ -9,9 +10,9 @@ ControllerView.prototype.getItem = function(DOMitem, callback) {
 ControllerView.prototype.registerClickEditMode = function(containerControllerID) {
   var id = "#" + this.getListItemID();
   var item = this.item;
-  $(id + " a").on('click.edit-item', function(e) {
+  $(id + " a").on('dblclick.edit-item', function(e) {
     this.getItem(item, function(err, dbItem) {
-      $(id).off('click.edit-item');
+      $(id).off('dblclick.edit-item');
       this.item = dbItem.item;
       this.createDOM({
         "item": dbItem
@@ -45,6 +46,7 @@ ControllerView.prototype.getItemsForComboBoxes = function(nameKey, callback) {
 ControllerView.prototype.getOneAndOutput = function() {
   this.getItemsByFilter({}, function(err, items) {
     var o = [];
+    //console.log(err, items);
     this.outputListItems(o, items, this.name);
     $("#" + this.name + "sList").html(o.join(''));
     this.getAllSetClickEvents(items);
@@ -54,7 +56,9 @@ ControllerView.prototype.getOneAndOutput = function() {
 
 
 ControllerView.prototype.getAndOutput = function(filter, container) {
+  //console.log("filter", filter, container);
   this.getItemsByFilter(filter, function(err, items) {
+    //console.log(items.length);
     var o = [];
     this.outputListItems(o, items, this.name);
     $(container).html(o.join(''));
@@ -64,10 +68,10 @@ ControllerView.prototype.getAndOutput = function(filter, container) {
 }
 
 ControllerView.prototype.getItemsByFilter = function(filter, callback) {
-
   this.pp.socket.emit("get" + this.name + "s", {
     "filter": filter
   }, function(err, items) {
+    //console.log(items);
     items = this.applyDBToViewTransformationsForItems(items);
     return callback(err, items);
   }.bind(this));

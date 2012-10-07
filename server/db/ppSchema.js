@@ -32,9 +32,58 @@ exports.schemas.StudientSchema = new mongoose.Schema({
   }
 });
 
+exports.Periods = ["Vacances", "Pérriode 1", "Pérriode 2", "Pérriode 3", "Pérriode 4", "Pérriode 5"];
+exports.Years = [2012, 2013];
+exports.Months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+exports.schemas.DaySchema = new mongoose.Schema({
+  "date": {
+    "type": Date,
+    "displayName": "Date"
+  },
+  "day": {
+    "type": Number,
+    "displayName": "Jour"
+  },
+  "month": {
+    "type": String,
+    "viewType": "Enum",
+    "enum": exports.Months,
+    "displayName": "Mois",
+    "readOnly": true
+  },
+  "year": {
+    "type": String,
+    "viewType": "Enum",
+    "enum": exports.Years,
+    "displayName": "Année",
+    "readOnly": true
+  },
+  "period": {
+    "type": String,
+    "viewType": "Enum",
+    "enum": exports.Periods,
+    "displayName": "Pérriode",
+    "readOnly": true
+  },
+
+  "order": {
+    "type": Number,
+    "default": 0,
+    "displayName": "Ordre"
+  },
+  "DayTemplate": {
+    "type": mongoose.Schema.ObjectId,
+    "ref": "DayTemplate",
+    "controller": "DayTemplate",
+    "displayName": "Journée type",
+    "viewType": "HasOne"
+  }
+});
 
 
 exports.DayStepSchemaTypes = ["ateliers", "regroupement", "accueils", "aide personnalisée", "motricité", "temps calme", "language-lecture", "jeux mathématiques", "travail collectif", "cantine", "récréation"];
+
+
 
 exports.schemas.DayStepSchema = new mongoose.Schema({
   "duration": {
@@ -53,14 +102,38 @@ exports.schemas.DayStepSchema = new mongoose.Schema({
     "type": String,
     'enum': exports.DayStepSchemaTypes,
     "displayName": "Type de l'étape",
-    "viewType": "Enum"
+    "viewType": "Enum",
+    "sortEnumValues": true,
+    "readOnly": true
   },
   "DayTemplate": {
-    "type": mongoose.Schema.ObjectId,
-    "ref": exports.schemas.DayTemplate,
+    "type": mongoose.Schema.Types.ObjectId,
+    "ref": "DayTemplate",
     "controller": "DayTemplate",
     "displayName": "Journée type",
     "viewType": "HasOne"
+  },
+  "order": {
+    "type": Number,
+    "default": 0,
+    "displayName": "Ordre"
+  }
+});
+
+
+
+exports.schemas.PeriodSchema = new mongoose.Schema({
+  "name": {
+    "type": String,
+    "displayName": "Nom"
+  },
+  "startDate": {
+    "type": Date,
+    "displayName": "Date Début"
+  },
+  "endDate": {
+    "type": Date,
+    "displayName": "Date Fin"
   },
   "order": {
     "type": Number,
@@ -77,18 +150,18 @@ exports.schemas.DayBookSchema = new mongoose.Schema({
   },
   "DayTemplate": {
     "type": mongoose.Schema.ObjectId,
-    "ref": exports.schemas.DayTemplate,
+    "ref": "DayTemplate",
     "controller": "DayTemplate",
     "displayName": "Journée type",
     "viewType": "HasOne"
   },
   "DayStep": {
     "type": mongoose.Schema.ObjectId,
-    "ref": exports.schemas.DayStep,
+    "ref": "DayStep",
     "controller": "DayStep",
     "displayName": "Etape",
     "viewType": "HasOne"
-  }  
+  }
 });
 
 
@@ -102,12 +175,13 @@ exports.schemas.DayTemplateSchema = new mongoose.Schema({
     "displayName": "Début de la journée",
     "viewType": "Time"
   },
-  "daySteps": {
-    "type": [exports.schemas.DayStepSchema],
+  "DayStep": [{
+    "type": mongoose.Schema.Types.ObjectId,
+    "ref": "DayStep",
     "controller": "DayStep",
     "displayName": "Etapes",
     "viewType": "HasMany"
-  }
+  }]
 
 });
 
@@ -116,18 +190,24 @@ exports.schemas.SkillSubDomainSchema = new mongoose.Schema({
     "type": String,
     "displayName": "Nom"
   },
-  "skills": {
-    "type": [exports.schemas.SkillSchema],
+  "skills": [{
+    "type": mongoose.Schema.ObjectId,
+    "ref": "Skill",
     "controller": "Skill",
     "displayName": "Compétences",
     "viewType": "HasMany"
-  },
+  }],
   "SkillDomain": {
     "type": mongoose.Schema.ObjectId,
-    "ref": exports.schemas.SkillDomainSchema,
+    "ref": "SkillDomain",
     "controller": "SkillDomain",
     "displayName": "Domaine",
     "viewType": "HasOne"
+  },
+  "order": {
+    "type": Number,
+    "default": 0,
+    "displayName": "Ordre"
   }
 });
 
@@ -142,6 +222,11 @@ exports.schemas.SkillDomainSchema = new mongoose.Schema({
     "controller": "SkillSubDomain",
     "displayName": "Sous-Domaines",
     "viewType": "HasMany"
+  },
+  "order": {
+    "type": Number,
+    "default": 0,
+    "displayName": "Ordre"
   }
 });
 
@@ -160,29 +245,31 @@ exports.schemas.SkillSchema = new mongoose.Schema({
     "controller": "SkillSubDomain",
     "displayName": "Sous-Domaine",
     "viewType": "HasOne"
-  }
-});
-
-
-
-exports.schemas.UserSchema = new mongoose.Schema({
-  "email": {
-    "type": mongoose.SchemaTypes.Email,
-    "index": {
-      "unique": true
-    }
   },
-  "password": {
-    "type": String
+  "order": {
+    "type": Number,
+    "default": 0,
+    "displayName": "Ordre"
   }
 });
 
 
-//exports.schemas.modelControllers = ["DayTemplate", "Studient", "Skill", "DayStep", "SkillDomain", "SkillSubDomain"];
 
+// exports.schemas.UserSchema = new mongoose.Schema({
+//   "email": {
+//     "type": mongoose.SchemaTypes.Email,
+//     "index": {
+//       "unique": true
+//     }
+//   },
+//   "password": {
+//     "type": String
+//   }
+// });
+//exports.schemas.modelControllers = ["DayTemplate", "Studient", "Skill", "DayStep", "SkillDomain", "SkillSubDomain"];
 exports.modelControllers = [];
-for (var schemaName in exports.schemas) {
-  if (exports.schemas.hasOwnProperty(schemaName)) {
+for(var schemaName in exports.schemas) {
+  if(exports.schemas.hasOwnProperty(schemaName)) {
     var controllerName = schemaName.replace(/Schema/g, "");
     var modelName = controllerName + "Model";
     //console.log(schemaName, controllerName, modelName);

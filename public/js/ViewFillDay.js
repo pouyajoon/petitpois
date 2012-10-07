@@ -1,7 +1,7 @@
 var ViewFillDay = function(pp) {
 
 
-
+  //console.log(pp.urlParams);
 
     var day = new Date(pp.urlParams.day) || Date.now();
     //var dayTemplateName = "GS 2012";

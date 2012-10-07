@@ -33,7 +33,13 @@ ControllerView.prototype.init = function(pp, name, displayName, modelView) {
 
 
 ControllerView.prototype.outputOne = function(item) {
-  return item._id + ' - ' + item.name + " *";
+  var o = [];
+  o.push(item._id);
+  if (!_.isUndefined(item.name)) {
+    o.push(' - ' + item.name);
+  }
+  o.push(" *");
+  return o.join('');
 }
 
 ControllerView.prototype.registerAddEvent = function(id, extraAttributes) {
@@ -84,6 +90,7 @@ ControllerView.prototype.outputControllerActionButtons = function(output, id) {
 ControllerView.prototype.outputOptionsHTML = function(output) {
   output.push('<h1 class="controller-name">', this.displayName, '</h1>');
   this.outputControllerActionButtons(output, this.name);
+  this.setupSearch(output);
   output.push('<div id="', this.name, 'sList"></div>');
 };
 
@@ -91,6 +98,7 @@ ControllerView.prototype.setOptionsHTML = function(container) {
   var o = [];
   this.outputOptionsHTML(o);
   $(container).html(o.join(''));
+  this.addJSActionsForSearchItems();
 }
 
 
@@ -101,7 +109,10 @@ ControllerView.prototype.applyDBToViewValue = function(type, value) {
     return cvAttrTools.dateToTime(value);
     break;
   case "Date":
-    return cvAttrTools.dateToShortDate(value);
+    var d = cvAttrTools.dateToShortDate(value);
+    d = cvAttrTools.shortDateToDate(d);
+    return d;
+    //return value;
     break;
   }
   return value;
@@ -131,6 +142,18 @@ ControllerView.prototype.outputComboBox = function(o, cbValues, selected, attrID
     o.push(cbV.name, "</option>");
   });
   o.push("</select>");
+};
+
+ControllerView.prototype.outputCheckBox = function(o, cbValues, selected, attrID) {
+  o.push("<div id='", this.getAttrDOMID(attrID), "' class='checkbox'>");
+  _.each(cbValues, function(cbV) {
+    //<input type="checkbox" id="check1" /><label for="check1">B</label>
+    //", cbV.value, "' ", (cbV.value === selected) ? "selected='selected' " : "", 
+    var id = this.getAttrDOMID(attrID) + '-' + cbV.value;
+    o.push("<input data-cb-value='", cbV.value, "' type='checkbox' id='", id, "'/>");
+    o.push("<label for='", id, "'>", cbV.name, "</label>");
+  }.bind(this));
+  o.push("</div>");
 };
 
 

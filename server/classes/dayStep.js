@@ -2,39 +2,19 @@ var ppSchema = require('../db/ppSchema');
 var _ = require('underscore');
 
 var DayStepModel = ppSchema.DayStepModel;
-
-
-// DayStepModel.prototype.setup = function(startTime, duration, callback){
-//   this.model = DayStepModel;
-//   this.startTime = startTime;
-//   this.duration = duration;
-//   return this.saveToDB(callback);
-// };
-// exports.create = function(startTime, duration, steps, callback){
-//   var a = new DayStepModel();
-//   return a.setup(startTime, duration, function(err, step){
-//    steps.push(step);
-//    return callback(null, steps, callback);
-//   });
-// };
 var cAPI = require("./ControllerAPI");
 var api = new cAPI(DayStepModel);
 
 
-var DayStepAPI = function() {
+var DayStepAPI = function() {};
 
-  };
+DayStepAPI.prototype.doAfterUpdateAll = function(err, lastItem, parentItem, callback) {
+  var item = lastItem;
 
-
-//var mongoose = require('mongoose');
-DayStepAPI.prototype.doCustomActionAfterSave = function(err, item, callback) {
-
-  if (_.isUndefined(item.DayTemplate)) {
+  console.log("after update all", item);
+  if(_.isUndefined(item.DayTemplate)) {
     return callback(err, item);
   }
-
-
-
   var dayTemplateAPI = new cAPI(ppSchema.DayTemplateModel);
   var filter = {
     "_id": item.DayTemplate
@@ -42,50 +22,23 @@ DayStepAPI.prototype.doCustomActionAfterSave = function(err, item, callback) {
   dayTemplateAPI.getItem(filter, function(err, dayTemplateItem) {
     var currentTime = dayTemplateItem.startTime;
     console.log("currentTime", currentTime);
+    var items = dayTemplateItem.DayStep;
 
-
-    filter = {
-      "DayTemplate": item.DayTemplate.toString()
-    };
-    api.getItems(filter, function(err, items) {
-
-      var itemsUpdated = 1;
-      var itemUpdated = function(err) {
-          console.log(itemsUpdated, err);
-          if (itemsUpdated >= items.length) {
-            return callback(null, item);
-          }
-          itemsUpdated += 1;
+    var itemsUpdated = 1;
+    var itemUpdated = function(err) {
+        console.log("orderd", itemsUpdated, err, items.length);
+        if(itemsUpdated >= items.length) {
+          return dayTemplateAPI.getItem(filter, callback);
         }
-
-      var i = 0;
-      _.each(items, function(dbItem) {
-        if (i === 0) {
-          dbItem.startTime = currentTime;
-        } else {
-          var newTime = new Date();
-          newTime.setTime(currentTime.getTime() + dbItem.duration.getTime());
-
-          dbItem.startTime = newTime;
-
-        }
-
-
-        currentTime = dbItem.startTime;
-        //        console.log("newTime", newTime, "start time", dbItem.startTime);
-        if (item._id === dbItem._id) {
-          item.startTime = dbItem.startTime;
-        }
-
-        dbItem.save(itemUpdated);
-        i += 1;
-      });
-
-      //console.log(items);
+        itemsUpdated += 1;
+      }
+    var i = 0;
+    _.each(items, function(dbItem) {
+      dbItem.startTime = Date.parse(currentTime.toString());
+      currentTime.setTime(currentTime.getTime() + dbItem.duration.getTime());
+      dbItem.save(itemUpdated);
+      i += 1;
     });
   });
-
-
 }
-
 exports.API = DayStepAPI;
