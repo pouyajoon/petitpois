@@ -60,9 +60,9 @@ ControllerView.prototype.registerAddEvent = function(id, extraAttributes) {
       }
       this.outputListItem(o);
       $("#list-" + id).append(o.join(''));
-
+      //console.log("container", this.containerController);
       this.registerClickEditMode();
-      //      this.containerControllerID = containerControllerID;         
+      //this.containerControllerID = containerControllerID;         
       this.createDOM(dbItem, "#" + this.getListItemID());
 
     }.bind(this));
@@ -137,7 +137,10 @@ ControllerView.prototype.applyDBToViewTransformationsForItems = function(items) 
 
 ControllerView.prototype.outputComboBox = function(o, cbValues, selected, attrID) {
   o.push("<select id='", this.getAttrDOMID(attrID), "' class='combobox'>");
-  _.each(cbValues, function(cbV) {
+  var values = [];
+  values.push({"name" : "Non Défini", "value" : 'null'});
+  values = values.concat(cbValues);
+  _.each(values, function(cbV) {
     o.push("<option value='", cbV.value, "' ", (cbV.value === selected) ? "selected='selected' " : "", ">");
     o.push(cbV.name, "</option>");
   });
@@ -161,7 +164,7 @@ ControllerView.prototype.browseModelView = function(item, callback) {
   //console.log(this.model);
   _.each(this.attributes, function(attr) {
     var attrView = this.model[attr];
-    //console.log("Attr", this.model, attr, attrView);
+    //console.log("Attr", this.model, attr, attrView, item);
     if (!_.isUndefined(attr)) {
       var value = item[attr];
       callback(attr, attrView, value);

@@ -21,22 +21,38 @@ Studient.prototype.outputOne = function(item) {
 var Skill = function() {}
 
 
-
 Skill.prototype.outputOne = function(item) {
-  if (!_.isUndefined(item) && !_.isUndefined(item.name)) {
-    return item.name;
+  console.log(item);
+  var o = [];
+
+  if(!_.isUndefined(item) && !_.isUndefined(item.name)) {
+    o.push(item.name);
+    if(item.Children.length > 0) {
+      o.push("<ul>");
+      for(var i = 0; i < item.Children.length; ++i) {
+        o.push("<li>", this.outputOne(item.Children[i]), '</li>');
+      }
+      o.push("</ul>");
+    }
+
   } else {
-    return item._id;
+    o.push(item._id);
   }
+
+  return o.join('');
 }
 
-//$.datepicker.setDefaults($.datepicker.regional["fr"]);
+var Period = function() {}
+Period.prototype.outputOne = function(item) {
+  return item.name;
+};
 
+//$.datepicker.setDefaults($.datepicker.regional["fr"]);
 var Day = function() {}
 Day.prototype.outputOne = function(item) {
   var date = item.date;
   var o = [];
-  if (item.date !== null) {
+  if(item.date !== null) {
     //var d = $.datepicker.formatDate('DD, MM d', item.date, {dayNamesShort: $.datepicker.regional['fr'].dayNamesShort, dayNames: $.datepicker.regional['fr'].dayNames, monthNamesShort: $.datepicker.regional['fr'].monthNamesShort, monthNAmes: $.datepicker.regional['fr'].monthNames});
     //console.log(item.date);
     //var d = Date.parse(item.date);
@@ -48,10 +64,10 @@ Day.prototype.outputOne = function(item) {
     o.push(dText);
     //o.push(item.date);
   }
-  if (item.DayTemplate !== null) {
+  if(item.DayTemplate !== null) {
     o.push('<br/>', item.DayTemplate.name);
   }
-  if (o.length === 0) {
+  if(o.length === 0) {
     o.push("*");
   }
   return o.join('');

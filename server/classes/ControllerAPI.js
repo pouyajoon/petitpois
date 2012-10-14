@@ -17,7 +17,7 @@ ControllerAPI.prototype.getItems = function(filter, callback) {
   for(var f in filter) {
     if(filter.hasOwnProperty(f)) {
       if(f === '_id') {
-        console.log("get id type", typeof filter[f]);
+        //console.log("get id type", typeof filter[f]);
         if((typeof filter[f]) === "string") {
           nfilter[f] = mongoose.Types.ObjectId(filter[f]);
         } else {
@@ -72,19 +72,15 @@ ControllerAPI.prototype.getItems = function(filter, callback) {
       query = query.populate(attr.name);
       break;
     case 'HasMany':
-      query = query.populate(attr.name);
+      query = query.populate(attr.name, null, null, {'sort' : [['order', 1]]});
       break;
 
     default:
       break;
     }
   }
-
-
   query.exec(callback);
 };
-
-
 
 ControllerAPI.prototype.reorderHasOneControllers = function(parentItem, callback) {
   for(var attrName in this.modelAttributes) {
@@ -92,6 +88,7 @@ ControllerAPI.prototype.reorderHasOneControllers = function(parentItem, callback
     switch(attr.type) {
     case 'HasOne':
       // load has many for parent controller
+      //console.log('parentItem', parentItem);
       var filter = {};
       filter[attr.controller] = parentItem._id;
       this.getItems(filter, function(err, items) {
@@ -117,14 +114,48 @@ ControllerAPI.prototype.getItem = function(item, callback) {
   var filter = {
     '_id': item._id
   };
+  //console.log(filter, item);
   this.getItems(filter, function(err, items) {
+    //console.log("items", err, items);
     if(items[0] !== null) {
       return callback(err, items[0]);
     }
   });
 };
 
-ControllerAPI.prototype.updateItem = function(item, callback) {
+
+
+ControllerAPI.prototype.updateHasOneForItem = function(attrV, item, parentControllerData, callback) {
+  (function(attrV, modelName, item) {
+    // update has many for the target item if required
+    // c = target controller
+    var parentController = new ControllerAPI(pp[attrV.controller + 'Model']);
+
+    console.log("parent Controller", parentController.model.modelName);
+    parentController.getItem({
+      '_id': item[attrV.name]
+    }, function(err, parentItem) {
+      // find new has one item in target
+      var itemExists = _.find(parentItem[parentControllerData.parentAttribute], function(i) {
+        return i._id == item._id;
+      });
+      // if parent item has a HasMany attribute
+      if(_.isUndefined(itemExists) && _.isArray(parentItem[parentControllerData.parentAttribute])) {
+        parentItem[parentControllerData.parentAttribute].push(item._id);
+        parentItem.saveToDB(function(err) {
+          return callback();
+        }.bind(this));
+      } else {
+        return callback();
+      }
+    }.bind(this));
+  }(attrV, this.model.modelName, item));
+
+};
+
+ControllerAPI.prototype.updateItem = function(data, callback) {
+  console.log("updateItem", data);
+  var item = data.item;
   var filter = {
     '_id': item._id
   };
@@ -143,6 +174,7 @@ ControllerAPI.prototype.updateItem = function(item, callback) {
 
       function attributeUpdated() {
         if(attributeUpdatedNum >= modelsNum) {
+          console.log("LAST SAVE", dbItem);
           dbItem.saveToDB(function(err, i) {
             return that.getItem(filter, callback);
           });
@@ -160,28 +192,25 @@ ControllerAPI.prototype.updateItem = function(item, callback) {
             attributeUpdated();
             break;
           case 'HasOne':
+            attributeUpdated();
+
             dbItem[attr] = item[attr];
-            (function(attrV, modelName, item) {
-              var c = new ControllerAPI(pp[attrV.name + 'Model']);
-              c.getItem({
-                '_id': item[attrV.name]
-              }, function(err, hasOneItem) {
-                var itemExists = _.find(hasOneItem[modelName], function(i) {
-                  return i._id == item._id;
-                });
-                if(_.isUndefined(itemExists)) {
-                  hasOneItem[modelName].push(item._id);
-                  hasOneItem.saveToDB(function(err) {
-                    attributeUpdated();
-                  }.bind(this));
-                } else {
-                  attributeUpdated();
-                }
-              }.bind(this));
-            }(attrV, this.model.modelName, item));
+            if(item[attr] === "null" || item[attr] === null) {
+              console.log("NULL", attr, item);
+              dbItem[attr] = null;
+              attributeUpdated();
+            } else {
+              console.log("updateITEM", item, attrV);
+              //dbItem[attr] = item[attr//new mongoose.Types.ObjectId(item[attr]);
+              this.updateHasOneForItem(attrV, item, data.parentController, attributeUpdated);
+              attributeUpdated();
+            }
+
+            //console.log("updateITEM TYPEOF", item, attr, typeof(item[attr]), item[attr]);
             break;
           default:
             dbItem[attr] = item[attr];
+            //console.log("update")
             attributeUpdated();
             break;
           }
@@ -220,7 +249,7 @@ ControllerAPI.prototype.getModel = function() {
     if(!_.isUndefined(attr.options.hidden)) {
       model.hidden = attr.options.hidden;
     }
-    if((typeof attr.options.type) === 'object') { 
+    if((typeof attr.options.type) === 'object') {
       model.type = attr.options.type[0].viewType;
       model.controller = attr.options.type[0].controller;
       model.displayName = attr.options.type[0].displayName;

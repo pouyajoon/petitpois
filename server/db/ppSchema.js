@@ -58,14 +58,13 @@ exports.schemas.DaySchema = new mongoose.Schema({
     "displayName": "Année",
     "readOnly": true
   },
-  "period": {
-    "type": String,
-    "viewType": "Enum",
-    "enum": exports.Periods,
-    "displayName": "Pérriode",
-    "readOnly": true
+  "Period": {
+    "type": mongoose.Schema.ObjectId,
+    "ref": "Period",
+    "viewType": "HasOne",
+    "controller": "Period",
+    "displayName": "Pérriode"
   },
-
   "order": {
     "type": Number,
     "default": 0,
@@ -139,7 +138,15 @@ exports.schemas.PeriodSchema = new mongoose.Schema({
     "type": Number,
     "default": 0,
     "displayName": "Ordre"
-  }
+  },
+  "Day": [{
+    "type": mongoose.Schema.Types.ObjectId,
+    "ref": "Day",
+    "controller": "Day",
+    "displayName": "Date",
+    "viewType": "HasMany"
+  }]
+
 });
 
 
@@ -185,50 +192,50 @@ exports.schemas.DayTemplateSchema = new mongoose.Schema({
 
 });
 
-exports.schemas.SkillSubDomainSchema = new mongoose.Schema({
-  "name": {
-    "type": String,
-    "displayName": "Nom"
-  },
-  "skills": [{
-    "type": mongoose.Schema.ObjectId,
-    "ref": "Skill",
-    "controller": "Skill",
-    "displayName": "Compétences",
-    "viewType": "HasMany"
-  }],
-  "SkillDomain": {
-    "type": mongoose.Schema.ObjectId,
-    "ref": "SkillDomain",
-    "controller": "SkillDomain",
-    "displayName": "Domaine",
-    "viewType": "HasOne"
-  },
-  "order": {
-    "type": Number,
-    "default": 0,
-    "displayName": "Ordre"
-  }
-});
+// exports.schemas.SkillSubDomainSchema = new mongoose.Schema({
+//   "name": {
+//     "type": String,
+//     "displayName": "Nom"
+//   },
+//   "skills": [{
+//     "type": mongoose.Schema.ObjectId,
+//     "ref": "Skill",
+//     "controller": "Skill",
+//     "displayName": "Compétences",
+//     "viewType": "HasMany"
+//   }],
+//   "SkillDomain": {
+//     "type": mongoose.Schema.ObjectId,
+//     "ref": "SkillDomain",
+//     "controller": "SkillDomain",
+//     "displayName": "Domaine",
+//     "viewType": "HasOne"
+//   },
+//   "order": {
+//     "type": Number,
+//     "default": 0,
+//     "displayName": "Ordre"
+//   }
+// });
 
 
-exports.schemas.SkillDomainSchema = new mongoose.Schema({
-  "name": {
-    "type": String,
-    "displayName": "Nom"
-  },
-  "SkillSubDomains": {
-    "type": [exports.schemas.SkillSubDomainSchema],
-    "controller": "SkillSubDomain",
-    "displayName": "Sous-Domaines",
-    "viewType": "HasMany"
-  },
-  "order": {
-    "type": Number,
-    "default": 0,
-    "displayName": "Ordre"
-  }
-});
+// exports.schemas.SkillDomainSchema = new mongoose.Schema({
+//   "name": {
+//     "type": String,
+//     "displayName": "Nom"
+//   },
+//   "SkillSubDomains": {
+//     "type": [exports.schemas.SkillSubDomainSchema],
+//     "controller": "SkillSubDomain",
+//     "displayName": "Sous-Domaines",
+//     "viewType": "HasMany"
+//   },
+//   "order": {
+//     "type": Number,
+//     "default": 0,
+//     "displayName": "Ordre"
+//   }
+// });
 
 exports.schemas.SkillSchema = new mongoose.Schema({
   "name": {
@@ -239,21 +246,37 @@ exports.schemas.SkillSchema = new mongoose.Schema({
     "type": String,
     "displayName": "Description"
   },
-  "SkillSubDomain": {
-    "type": mongoose.Schema.ObjectId,
-    "ref": exports.schemas.SkillSubDomainSchema,
-    "controller": "SkillSubDomain",
-    "displayName": "Sous-Domaine",
-    "viewType": "HasOne"
-  },
   "order": {
     "type": Number,
     "default": 0,
     "displayName": "Ordre"
-  }
+  },
+  "Parent": {
+    "type": mongoose.Schema.Types.ObjectId,
+    "ref": "Skill",
+    "controller": "Skill",
+    "displayName": "Parent",
+    "viewType": "HasOne"
+  },
+  "Children": [{
+    "type": mongoose.Schema.Types.ObjectId,
+    "ref": "Skill",
+    "controller": "Skill",
+    "displayName": "Enfants",
+    "viewType": "HasMany"
+  }]
+
 });
 
 
+// ,
+//   "SkillSubDomain": {
+//     "type": mongoose.Schema.ObjectId,
+//     "ref": exports.schemas.SkillSubDomainSchema,
+//     "controller": "SkillSubDomain",
+//     "displayName": "Sous-Domaine",
+//     "viewType": "HasOne"
+//   },
 
 // exports.schemas.UserSchema = new mongoose.Schema({
 //   "email": {

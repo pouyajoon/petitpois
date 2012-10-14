@@ -125,7 +125,7 @@ new Server(serverOptions, function(err, _server) {
       socket.on('updateAll' + className, function(data, callback) {
 
 
-        console.log("updateALL", data);
+        //console.log("updateALL", data);
         var updated = 1;
 
 
@@ -136,17 +136,15 @@ new Server(serverOptions, function(err, _server) {
         function checkUpdates(err, item) {
           //console.log(updated, err, item, data.items.length);
           if(updated >= data.items.length) {
-            //console.log("check Update", item);
+            //console.log("check Update", item, data.parentController);
             api.reorderHasOneControllers(item[data.parentController], function(err, parentItem) {
-              console.log("parent ITEM", parentItem);
+              //console.log("parent ITEM", parentItem);
               if(_.isFunction(classInstance.doAfterUpdateAll)) {
                 return classInstance.doAfterUpdateAll(err, item, null, callback);
               } else {
                 return callback(null);
               }
             });
-
-            //api.reorderHasOneControllers(item[0])
             //console.log("doAfterUpdateAll", classInstance.doAfterUpdateAll);
           }
           updated += 1;

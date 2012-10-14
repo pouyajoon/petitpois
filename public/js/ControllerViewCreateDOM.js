@@ -38,9 +38,25 @@ ControllerView.prototype.createDOMDoActionsForOneInput = function(attr, attrView
 
     view.getItemsForComboBoxes("name", function(err, cbValues) {
       var o = [];
-      this.outputComboBox(o, cbValues, value, attrView.id);
+      var v = null;
+      if(value !== null && !_.isUndefined(value)) {
+        v = value._id;
+      }
+      //console.log("value has one", attrView.id, v);
+      this.outputComboBox(o, cbValues, v, attrView.id);
       var containerID = "#" + this.getAttrDOMID(attrView.id) + "-structure div.label";
       $(containerID).after(o.join(''));
+
+      // update parent has one if is set from container
+      console.log("from container", this.containerController);
+      if(!_.isUndefined(this.containerController) && this.containerController.name === attrView.controller) {
+        var id = this.getClassDOMID() + "-" + attrView.id;
+        var containerStructure = $("#" + id + "-structure");
+        $("#" + id).val(this.containerController.value);
+        //containerStructure.hide();
+      }
+
+
       this.setComboBoxes(attrView);
     }.bind(this));
 
@@ -50,13 +66,15 @@ ControllerView.prototype.createDOMDoActionsForOneInput = function(attr, attrView
 
     var filter = {};
     filter[this.name] = this.item._id;
-    viewController.containerControllerID = this.name;
-
-
+    viewController.containerController = {
+      'name': this.name,
+      'value': this.item._id,
+      'parentAttribute' : attrView.id
+    };
     //viewController.getItemsByFilter(filter, function(err, items) {
-    //console.log(this.item);
-    items = this.item[viewController.name];
-    //console.log(items.length, items);
+    console.log(this.item, attrView.id);
+    items = this.item[attrView.id];
+    console.log(items.length, items);
     items = viewController.applyDBToViewTransformationsForItems(items);
     var options = [];
     options.push("<li class='has-many-options'>");
@@ -98,7 +116,9 @@ ControllerView.prototype.createDOMDoActionsForOneInput = function(attr, attrView
           //console.log("filter order", filter);
           //}
           //viewController.getItem(filter, 
-          this.getItem({"_id" : this.item._id}, function(err, nitem) {
+          this.getItem({
+            "_id": this.item._id
+          }, function(err, nitem) {
             //console.log("new item", nitem);
             this.item[viewController.name] = nitem[viewController.name];
             this.createDOMDoActionsForOneInput(attr, attrView, value, function() {
@@ -174,9 +194,9 @@ ControllerView.prototype.createDOMOutputEditAttr = function(container) {
 
 };
 
-ControllerView.prototype.outputDOMEditAttr = function(first_argument) {
-  // body...
-};
+// ControllerView.prototype.outputDOMEditAttr = function(first_argument) {
+//   // body...
+// };
 
 ControllerView.prototype.setComboBoxes = function(attrView) {
   $("#" + this.getAttrDOMID(attrView.id)).combobox().change(this.update.bind(this)); // attr('id', this.getAttrDOMID(attrView.id)).change(this.update);
@@ -220,7 +240,7 @@ ControllerView.prototype.createDOMDoJSActions = function() {
 
 
 ControllerView.prototype.createDOMAddJSEditAttrUpdate = function() {
-  
+
 
   var itemDOMID = "#" + this.getListItemID();
 
@@ -297,8 +317,5 @@ ControllerView.prototype.createDOM = function(data, container) {
   this.createDOMDoJSActions();
   this.createDOMAddJSEditAttrUpdate();
 
-  if(!_.isUndefined(this.containerControllerID)) {
-    //$("#" + this.getClassDOMID() + "-" + this.containerControllerID + "-structure").hide();
-  }
 
 }

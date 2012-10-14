@@ -1,7 +1,7 @@
 var PetitPoids = function(callback) {
     this.socket = io.connect("http://pouyaair:8081");
 
-    this.customMenuLinks = ["ViewFillDay", "ViewCalendar"];
+    this.customMenuLinks = ["ViewFillDay"];
 
 
     this.getURLParams = getURLParams;
@@ -16,21 +16,14 @@ var PetitPoids = function(callback) {
 
     setupScroll();
 
-
-
-    // this.socket.on('data', function(data) {
-    //   $.each(data.studients, function(i, s) {
-    //     $('body').append(s.name + "</br>");
-    //   });
-    // }.bind(this));
     this.socket.on('disconnect', function(data) {}.bind(this));
 
 
-    function initDefaultViews(err, callback) {
-      _.each(this.controllers, function(cname) {
-        //window[cname] = new ControllerView();
-      }.bind(this));
-    }
+    // function initDefaultViews(err, callback) {
+    //   _.each(this.controllers, function(cname) {
+    //     //window[cname] = new ControllerView();
+    //   }.bind(this));
+    // }
 
     function setupScroll() {
       $(window).scroll(function() {
@@ -71,9 +64,7 @@ PetitPoids.prototype.loadControllerAsMainContent = function(controller) {
 
 
 PetitPoids.prototype.loadController = function(name, container, callback) {
-  //$("head").append('<script type="text/javascript" src="/js/' + name + '.js"></script>');
   $("head").append('<link rel="stylesheet" href="/css/' + name + '.css"/>');
-
   new window[name](this, container, function(err, viewController) {
     return callback(err, viewController);
   });
@@ -95,7 +86,6 @@ PetitPoids.prototype.loadView = function(controller) {
 PetitPoids.prototype.getModels = function(err, callback) {
   this.socket.emit('getModels', {}, function(err, models) {
     this.models = models;
-    console.log(models);
     _.each(this.controllers, function(cname) {
       if(!_.isUndefined(window[cname])) {
         cvTools.heritate(window[cname], ControllerView);

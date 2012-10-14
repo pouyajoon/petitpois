@@ -1,4 +1,6 @@
 ControllerView.prototype.getItem = function(DOMitem, callback) {
+  //console.log("DOM ITEM", DOMitem);
+
   this.pp.socket.emit("get" + this.name + "Item", DOMitem, function(err, dbItem) {
     dbItem = this.applyDBToViewTransformationsForItem(dbItem);
     //console.log("get item", dbItem);
@@ -68,6 +70,7 @@ ControllerView.prototype.getAndOutput = function(filter, container) {
 }
 
 ControllerView.prototype.getItemsByFilter = function(filter, callback) {
+  //console.log("filter", filter);
   this.pp.socket.emit("get" + this.name + "s", {
     "filter": filter
   }, function(err, items) {

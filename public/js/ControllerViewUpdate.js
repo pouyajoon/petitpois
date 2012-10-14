@@ -1,9 +1,12 @@
 
 ControllerView.prototype.update = function(callback) {
   this.updateItemFromDOM();
-  console.log(this.item);
-  this.pp.socket.emit("update" + this.name, this.item, function(err, dbItem) {
-    //console.log("update api answer", err, this.item);
+
+  var data = {};
+  data.item = this.item;
+  data.parentController = this.containerController;
+  this.pp.socket.emit("update" + this.name, data, function(err, dbItem) {
+    console.log("update api answer", err, this.item);
     if (err) {
       return this.catchError(err);
     }
@@ -18,7 +21,7 @@ ControllerView.prototype.update = function(callback) {
 ControllerView.prototype.updateAll = function(items, callback){
   var data = {};
   data.items = items;
-  data.parentController = this.containerControllerID;
+  data.parentController = this.containerController.name;
   this.pp.socket.emit("updateAll" + this.name, data, function(err) {
     //console.log("update all api answer", err);
     if (err) {
@@ -48,12 +51,12 @@ ControllerView.prototype.updateItemFromDOM = function() {
     case "HasOne":
       //console.log("hasOne", attrView, this.item, DOMValue);
       this.item[attrView.id] = DOMValue;
-      if (_.isUndefined(DOMValue) || DOMValue.length === 0) {
+      if (_.isUndefined(DOMValue) || DOMValue === null || DOMValue.length === 0) {
         this.item[attrView.id] = null;
       }
       break;
     case "HasMany":
-      if (_.isUndefined(DOMValue) || DOMValue.length === 0) {
+      if (_.isUndefined(DOMValue) || DOMValue === null || DOMValue.length === 0) {
         DOMValue = [];
       }
       this.item[attrView.id] = DOMValue;
