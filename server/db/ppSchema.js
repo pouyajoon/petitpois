@@ -32,6 +32,19 @@ exports.schemas.StudientSchema = new mongoose.Schema({
   }
 });
 
+
+exports.schemas.ClassSchema = new mongoose.Schema({
+  "name": {
+    "type": String,
+    "displayName": "Nom"
+  },
+  "order": {
+    "type": Number,
+    "default": 0,
+    "displayName": "Ordre"
+  }
+});
+
 exports.Periods = ["Vacances", "Pérriode 1", "Pérriode 2", "Pérriode 3", "Pérriode 4", "Pérriode 5"];
 exports.Years = [2012, 2013];
 exports.Months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
@@ -217,8 +230,6 @@ exports.schemas.DayTemplateSchema = new mongoose.Schema({
 //     "displayName": "Ordre"
 //   }
 // });
-
-
 // exports.schemas.SkillDomainSchema = new mongoose.Schema({
 //   "name": {
 //     "type": String,
@@ -236,7 +247,6 @@ exports.schemas.DayTemplateSchema = new mongoose.Schema({
 //     "displayName": "Ordre"
 //   }
 // });
-
 exports.schemas.SkillSchema = new mongoose.Schema({
   "name": {
     "type": String,
@@ -251,12 +261,18 @@ exports.schemas.SkillSchema = new mongoose.Schema({
     "default": 0,
     "displayName": "Ordre"
   },
+  "importId": {
+    "type": Number,
+    "default": 0,
+    "displayName": "Import ID"
+  },
   "Parent": {
     "type": mongoose.Schema.Types.ObjectId,
     "ref": "Skill",
     "controller": "Skill",
     "displayName": "Parent",
-    "viewType": "HasOne"
+    "viewType": "HasOne",
+    'search': false
   },
   "Children": [{
     "type": mongoose.Schema.Types.ObjectId,
@@ -265,7 +281,14 @@ exports.schemas.SkillSchema = new mongoose.Schema({
     "displayName": "Enfants",
     "viewType": "HasMany"
   }]
-
+  ,
+  "Classes": [{
+    "type": mongoose.Schema.Types.ObjectId,
+    "ref": "Class",
+    "controller": "Class",
+    "displayName": "Classes",
+    "viewType": "HasMany"
+  }]
 });
 
 
@@ -277,7 +300,6 @@ exports.schemas.SkillSchema = new mongoose.Schema({
 //     "displayName": "Sous-Domaine",
 //     "viewType": "HasOne"
 //   },
-
 // exports.schemas.UserSchema = new mongoose.Schema({
 //   "email": {
 //     "type": mongoose.SchemaTypes.Email,

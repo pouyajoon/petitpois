@@ -1,10 +1,9 @@
 body{
-	    font: 400 12px/1.5 "Open Sans",sans-serif;
 	    margin:0px;
       margin-top: 60px;
 }
 
-input, textarea{
+input, textarea, body{
   font: 400 12px/1.5 "Open Sans",sans-serif;
 }
 
@@ -228,7 +227,7 @@ h1.controller-name{
 }
 
 table.fillDay th.day{
-  width: 40%;
+  width: 90%;
 }
 
 table.fillDay{
@@ -244,7 +243,12 @@ table.fillDay td, table.fillDay th{
 }
 
 input.search{
-  width: 100%;
+  width: 90%;
+  margin: auto;
+}
+
+div.search-zone{
+  text-align: center;
 }
 
 textarea.activities{
@@ -255,7 +259,17 @@ textarea.activities{
   height: 100px;
 }
 
+table.results{
+  /*display: none;*/
+  width: 90%;
+  margin: auto;
+  border-collapse: collapse;
+}
 
+table.results th{
+  width: 50%;
+  height: 16px;
+}
 
 
 table.calendar{
@@ -310,8 +324,6 @@ ul.small li{
  margin:5px;
 }
 
-
-
 .list-item-Day{
   min-width: 140px;
   min-height: 80px;
@@ -321,3 +333,57 @@ ul.small li{
   margin:2px;
   vertical-align: top;
 }
+
+.pp-edit-item-zone{
+  cursor: pointer;
+  /*background-image: url('/images/edit-icon.png');*/
+  width: 24px;
+  height: 24px; 
+}
+
+table.h-table{
+  border-collapse: collapse;
+  border:1px solid #eee;
+}
+
+table.h-table td{
+  border-collapse: collapse;
+  border:1px solid #eee;
+  vertical-align: top;
+  min-width: 60px;
+  padding: 2px;
+  border-bottom-color: #999; 
+}
+
+table.h-table td.selection{
+  width: 80px;
+  background-color: #efefef;
+  border-color: #999;
+}
+
+table.h-table td.selection.selected{
+  background-color: #999;
+}
+
+table.h-table th.classe-name{
+  border:1px solid #999;
+  background-color: white;
+}
+
+table.h-table tr:hover td{
+  background-color: #ddd;  
+}
+
+table.h-table tr.headers th.empty{
+  opacity: 0.8;
+  text-align: left;
+  background-color: white;
+}
+
+table.h-table td.empty{
+   border-bottom-color: #eee;  
+   background-color: transparent;
+   text-align: left;
+}
+
+

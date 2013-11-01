@@ -1,20 +1,30 @@
 ControllerView.prototype.getItem = function(DOMitem, callback) {
-  //console.log("DOM ITEM", DOMitem);
 
-  this.pp.socket.emit("get" + this.name + "Item", DOMitem, function(err, dbItem) {
-    dbItem = this.applyDBToViewTransformationsForItem(dbItem);
-    //console.log("get item", dbItem);
-    return callback(err, dbItem);
-  }.bind(this));
+
+  var filter = {};
+  filter._id = DOMitem._id;
+  this.getItemsByFilter(filter, function(err, items) {
+    if(items.length === 1) {
+      //console.log("DOM ITEM", DOMitem);
+      return callback(err, items[0]);
+    }
+  });
+
+  // this.pp.socket.emit("get" + this.name + "Item", DOMitem, function(err, dbItem) {
+  //   dbItem = this.applyDBToViewTransformationsForItem(dbItem);
+  //   //console.log("get item", dbItem);
+  //   return callback(err, dbItem);
+  // }.bind(this));
 };
 
 
 ControllerView.prototype.registerClickEditMode = function(containerControllerID) {
   var id = "#" + this.getListItemID();
   var item = this.item;
-  $(id + " a").on('dblclick.edit-item', function(e) {
+  $(id + " a").on('click.edit-item', function(e) {
     this.getItem(item, function(err, dbItem) {
-      $(id).off('dblclick.edit-item');
+      console.log("get ITEM one", dbItem);
+      $(id).off('click.edit-item');
       this.item = dbItem.item;
       this.createDOM({
         "item": dbItem
@@ -58,12 +68,31 @@ ControllerView.prototype.getOneAndOutput = function() {
 
 
 ControllerView.prototype.getAndOutput = function(filter, container) {
+  var that = this;
   //console.log("filter", filter, container);
   this.getItemsByFilter(filter, function(err, items) {
     //console.log(items.length);
     var o = [];
     this.outputListItems(o, items, this.name);
     $(container).html(o.join(''));
+
+
+    //console.log($('ul.list'));
+
+
+    function hideChildrens() {
+      $('ul.list').children().hide();
+      $('li.list-item label').click(function(e) {
+        console.log($(this));
+        $(this).parent().children('ul.list').children('li').toggle();
+      });
+      $('#list-' + that.name).children().show();
+
+    }
+
+    hideChildrens();
+
+
     this.getAllSetClickEvents(items);
 
   }.bind(this));
@@ -74,7 +103,7 @@ ControllerView.prototype.getItemsByFilter = function(filter, callback) {
   this.pp.socket.emit("get" + this.name + "s", {
     "filter": filter
   }, function(err, items) {
-    //console.log(items);
+    //console.log("get items", items);
     items = this.applyDBToViewTransformationsForItems(items);
     return callback(err, items);
   }.bind(this));

@@ -1,3 +1,7 @@
+
+
+
+
 ControllerView.prototype.createInputForAttr = function(o, attrView, value) {
   switch(attrView.type) {
   case "Enum":
@@ -48,7 +52,7 @@ ControllerView.prototype.createDOMDoActionsForOneInput = function(attr, attrView
       $(containerID).after(o.join(''));
 
       // update parent has one if is set from container
-      console.log("from container", this.containerController);
+      //console.log("from container", this.containerController);
       if(!_.isUndefined(this.containerController) && this.containerController.name === attrView.controller) {
         var id = this.getClassDOMID() + "-" + attrView.id;
         var containerStructure = $("#" + id + "-structure");
@@ -69,12 +73,12 @@ ControllerView.prototype.createDOMDoActionsForOneInput = function(attr, attrView
     viewController.containerController = {
       'name': this.name,
       'value': this.item._id,
-      'parentAttribute' : attrView.id
+      'parentAttribute': attrView.id
     };
     //viewController.getItemsByFilter(filter, function(err, items) {
-    console.log(this.item, attrView.id);
+    //console.log(this.item, attrView.id);
     items = this.item[attrView.id];
-    console.log(items.length, items);
+    //console.log(items.length, items);
     items = viewController.applyDBToViewTransformationsForItems(items);
     var options = [];
     options.push("<li class='has-many-options'>");
@@ -94,9 +98,10 @@ ControllerView.prototype.createDOMDoActionsForOneInput = function(attr, attrView
 
 
 
+
     $("#list-" + this.getAttrDOMID(attrView.id)).sortable("cancel");
 
-
+  
     $("#list-" + this.getAttrDOMID(attrView.id)).sortable({
       "stop": function(s) {
         var orderedItems = [];
@@ -197,7 +202,6 @@ ControllerView.prototype.createDOMOutputEditAttr = function(container) {
 // ControllerView.prototype.outputDOMEditAttr = function(first_argument) {
 //   // body...
 // };
-
 ControllerView.prototype.setComboBoxes = function(attrView) {
   $("#" + this.getAttrDOMID(attrView.id)).combobox().change(this.update.bind(this)); // attr('id', this.getAttrDOMID(attrView.id)).change(this.update);
 };
@@ -281,12 +285,21 @@ ControllerView.prototype.createDOMAddJSEditAttrUpdate = function() {
 
 
 ControllerView.prototype.getListItemLink = function(output, item) {
-  var o = this.outputOne(item).trim();
+  var o = "";
+  if(!_.isUndefined(this.outputOneInMainList)) {
+    o = this.outputOneInMainList(item).trim();
+  } else {
+    var outputOne = this.outputOne(item);
+    if (_.isUndefined(outputOne)){
+      outputOne = ""; 
+    }
+    o = outputOne.trim();
+  }
   if(o.length === 0) {
     o = item._id;
   }
 
-  output.push('<a>', o, '</a>');
+  output.push('<a title="Modifier" class="pp-edit-item-zone"><img src="/images/edit-icon.png"/></a>', ' ', o);
 };
 
 ControllerView.prototype.outputListItem = function(output) {
@@ -316,6 +329,7 @@ ControllerView.prototype.createDOM = function(data, container) {
 
   this.createDOMDoJSActions();
   this.createDOMAddJSEditAttrUpdate();
+
 
 
 }

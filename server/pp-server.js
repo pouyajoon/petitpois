@@ -137,6 +137,9 @@ new Server(serverOptions, function(err, _server) {
           //console.log(updated, err, item, data.items.length);
           if(updated >= data.items.length) {
             //console.log("check Update", item, data.parentController);
+            if (_.isUndefined(item[data.parentController])){
+              return callback(null);
+            }
             api.reorderHasOneControllers(item[data.parentController], function(err, parentItem) {
               //console.log("parent ITEM", parentItem);
               if(_.isFunction(classInstance.doAfterUpdateAll)) {
@@ -152,7 +155,7 @@ new Server(serverOptions, function(err, _server) {
 
         _.each(data.items, function(item) {
 
-          //console.log(className, "received", item);
+          console.log(className, "received", item);
           api.getItem({
             '_id': item._id
           }, function(err, gItem) {
@@ -160,8 +163,19 @@ new Server(serverOptions, function(err, _server) {
             if(gItem != null) {
               for(var attr in models) {
                 if(models.hasOwnProperty(attr)) {
+                  var attrView = models[attr];
                   if(!_.isUndefined(item[attr])) {
-                    gItem[attr] = item[attr];
+                    console.log('attr',attr, item[attr]);
+                    switch (attrView.type){
+                      // case 'HasMany' :
+                      // _.each(item[attr], function(a){
+                      //   gItem[attr].push(a);
+                      // })
+                      // break;
+                      default :
+                      gItem[attr] = item[attr];
+                    }
+                    
                   }
                 }
               }

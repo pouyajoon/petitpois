@@ -83,17 +83,17 @@
   Step([
 
   function(next) {
-    createPeriod("C", "Pérriode 1", 2012, 9, 4, 10, 27, 0, next);
+    createPeriod("C", "Période 1", 2012, 9, 4, 10, 27, 0, next);
   }, function(next) {
-    createPeriod("C", "Pérriode 2", 2012, 11, 12, 12, 22, 1, next);
+    createPeriod("C", "Période 2", 2012, 11, 12, 12, 22, 1, next);
   }, function(next) {
-    createPeriod("C", "Pérriode 3", 2013, 1, 7, 3, 2, 2, next);
+    createPeriod("C", "Période 3", 2013, 1, 7, 3, 2, 2, next);
   }, function(next) {
-    createPeriod("C", "Pérriode 4", 2013, 3, 18, 4, 27, 3, next);
+    createPeriod("C", "Période 4", 2013, 3, 18, 4, 27, 3, next);
   }, function(next) {
-    createPeriod("C", "Pérriode 5", 2013, 5, 13, 7, 6, 4, function() {
-      importDays(2012);
-      importDays(2013);
+    createPeriod("C", "Période 5", 2013, 5, 13, 7, 6, 4, function() {
+      // importDays(2012);
+      // importDays(2013);
     });
   }]);
 
@@ -128,7 +128,9 @@
               } else {
                 item.Period = null;
               }
-              dayApi.updateItem(item, function(err, i) {
+              var d = {};
+              d.item = item;
+              dayApi.updateItem(d, function(err, i) {
                 console.log(item.date);
               });
             });

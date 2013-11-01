@@ -1,5 +1,5 @@
 ControllerView.prototype.setupSearch = function(output) {
-
+  //return;
   output.push("<ul class='pp-search-zone'>");
   this.browseModelView(this.item, function(attr, attrView, value) {
     this.item._id = 'pp-search-zone';
@@ -13,6 +13,10 @@ ControllerView.prototype.setupSearch = function(output) {
       break;
     case "HasOne":
       var view = this.pp.c(attrView.controller);
+      console.log(attrView);
+      if (!_.isUndefined(attrView.search) && attrView.search === false){
+        break;
+      }
       view.getItemsForComboBoxes("name", function(err, cbValues) {
         var o = [];
         o.push("<li data-attr-name='", attrView.name, "'>");
@@ -22,9 +26,7 @@ ControllerView.prototype.setupSearch = function(output) {
         zone.on('change', this.searchFilterHasChanged.bind(this));
         $("ul.pp-search-zone").append(zone).buttonset();
       }.bind(this));
-
       break;
-
     }
     output.push(o.join(''));
   }.bind(this));

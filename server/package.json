@@ -13,7 +13,8 @@
     "common" : ">= 0.0.1",
     "socket.io-client" : ">= 0.8.7",
     "should" : ">= 0.0.1",
-    "connect-redis" : ">= 0.0.1"
+    "connect-redis" : ">= 0.0.1",
+    "mysql" : "> 0.0.1"
   }
   , "scripts": {
     "test": "make test"
